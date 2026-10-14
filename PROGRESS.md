@@ -1,8 +1,8 @@
 # TraceVerse progress
 
-Target: a tested MIT-licensed v0.2.0 upgrade and public synthetic-only GitHub Pages demo.
+Status: MIT-licensed v0.2.0 published; public synthetic-only demo deployed and verified.
 
-## v0.2.0 resume checkpoint — 2026-10-14
+## v0.2.0 completed — 2026-10-14
 
 - Resumed existing `main` from `09f36d0`. Preserved and reviewed interrupted dashboard, renderer, documentation, and build changes; no restart or new repository.
 - Implemented separate `/traceverse/` public static build, hash navigation, synthetic-only source/import/replay boundaries, separate browser storage, and no collector transport. Five interactive scenarios cover nine entities, with bounded traffic, speed, pause, and replay controls.
@@ -12,11 +12,13 @@ Target: a tested MIT-licensed v0.2.0 upgrade and public synthetic-only GitHub Pa
 - Six static Chromium tests passed: 3D/inspector/camera, all scenarios, 2D/keyboard/settings, replay/synthetic-only import, hash refresh/assets/notices, mobile/offline. Actual screenshots and `docs/assets/demo-v0.2.webm` captured.
 - Final isolated browser verification passed: all six local tests (54.4 seconds) and all six static tests (1.7 minutes). Earlier text assertion failures were corrected; a camera-click timeout under concurrent verification did not recur in the isolated run.
 - License audit reviewed 550 locked dependencies with no unresolved expressions; zero npm audit vulnerabilities. Browser builds retain 61 full upstream notices and checked-in source texts. Credential-pattern scan found no matches.
-- GitHub Pages setting successfully enabled with `build_type=workflow` and HTTPS. Workflow builds/tests public output before deployment. No public deployment or v0.2.0 release is claimed yet.
+- GitHub Pages enabled with `build_type=workflow` and HTTPS. Workflow builds/tests only the static synthetic output before deployment; no collector or real telemetry is published.
 - Benchmark completed: Windows/i7-1165G7, Chromium 156, explicitly selected SwiftShader software WebGL, five-second heavy-scenario samples. Balanced 19.1 actual renders/second; navigation to first 3D frame 2.47–4.50 seconds across presets; all presets settled to zero rendered frames over a three-second pause sample. Low had substantial initial stalls, so the sample cannot rank presets or predict hardware GPU performance. Full measurements: `docs/performance.json`.
-- Implementation `0b33c9f`, verification `8b466e6`, and mobile fallback-font correction `62701ae` pushed to the existing repository. The corrected Linux browser/Next.js job and Windows/Linux checks passed. macOS remains queued in https://github.com/prohz189hh-boop/traceverse/actions/runs/38585324448; no macOS success is claimed yet.
-- Corrected Pages build/deployment succeeded: https://github.com/prohz189hh-boop/traceverse/actions/runs/38585324435. Public HTTPS URL returns 200 with the correct repository asset base. All six static browser tests passed against the deployed site (1.9 minutes), including scenarios, camera/inspector, 2D/keyboard, synthetic-only replay imports, hash refresh/assets, mobile/offline, and no collector API/WebSocket traffic.
-- Actual video verified as valid WebM/VP9, 1440×900, 10.8 seconds. Repository homepage points to the working demo. After the ARM `macos-latest` job stayed unassigned for over 14 minutes, CI's macOS matrix entry was moved to GitHub's documented free standard `macos-15-intel` pool, preserving the same checks. Local implementation and documentation are saved. Remaining: green CI on the standard Intel runner; publish v0.2.0 tag/release and attach video; record final completion.
+- Implementation `0b33c9f`, verification `8b466e6`, mobile fallback-font correction `62701ae`, and CI refinement `aff6c45` pushed to the existing repository. All four final CI jobs passed (Windows, Linux, macOS 15 Intel, Linux Chromium/Next.js): https://github.com/prohz189hh-boop/traceverse/actions/runs/38587481151. After an unassigned ARM macOS job delayed verification, CI moved to GitHub's documented free standard Intel pool with the same checks. ARM macOS is not claimed as v0.2.0 verification.
+- Final Pages build/deployment succeeded: https://github.com/prohz189hh-boop/traceverse/actions/runs/38587481264. https://prohz189hh-boop.github.io/traceverse/ returns HTTPS 200 with the correct asset base. All six static browser tests passed against the deployed implementation (1.9 minutes), covering scenarios, camera/inspector, 2D/keyboard, synthetic-only replay imports, hash refresh/assets, mobile/offline, and no collector API/WebSocket traffic. Desktop and mobile checks passed again after the final deployment (16.8 seconds).
+- Release published at https://github.com/prohz189hh-boop/traceverse/releases/tag/v0.2.0 with title **TraceVerse v0.2.0 — Explore Your App in 3D**. Tag and release target verified as `aff6c4575bc3b42db293dced9286ff81591da736`.
+- Actual video attached: https://github.com/prohz189hh-boop/traceverse/releases/download/v0.2.0/demo-v0.2.webm. Valid WebM/VP9, 1440×900, 10.8 seconds; uploaded size 2,615,322 bytes and SHA-256 `c3baad4be686b8c723f0f0019816bba1a183af5d31f63ae1d58d25b5c334dd7b` match the local file. Repository homepage points to the verified demo.
+- No release blocker remains. This completion record is a documentation-only follow-up to the tested/tagged release. Local verification servers have stopped. Limits: OTLP/HTTP JSON traces only; local Node-runtime/webpack Next.js fixture; short software-WebGL performance samples; no hardware GPU/large-cluster frame-rate guarantee. Future roadmap remains optional.
 
 ## v0.1.0 verified release history
 
