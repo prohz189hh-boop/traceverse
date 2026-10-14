@@ -25,6 +25,20 @@ The harness measures the public preview at `http://127.0.0.1:4173/traceverse/`. 
 
 ## Interpret the result
 
+## Recorded v0.2.0 run
+
+Measured on Windows, Intel i7-1165G7, Chromium 156, 1536×960 viewport and device scale factor 1. SwiftShader **software** WebGL was explicitly selected; these are not measurements of the laptop's hardware GPU. The nine-node heavy scenario ran at intensity 1 and speed 1. Each quality used one fresh context and one five-second active sample.
+
+| Preset   | Navigation to first 3D frame | Actual renders/second | Draw calls | Triangles | Settled pause, 3 seconds |
+| -------- | ---------------------------: | --------------------: | ---------: | --------: | -----------------------: |
+| Low      |                       2.47 s |                   3.5 |         25 |     3,462 |                 0 frames |
+| Balanced |                       4.50 s |                  19.1 |         26 |     6,982 |                 0 frames |
+| High     |                       3.99 s |                  18.3 |         26 |     6,982 |                 0 frames |
+
+The first low sample had substantial stalls (animation-frame p95 1.8 seconds), so this short run cannot rank the presets or predict sustained hardware performance. All samples include initial scenario activity; shader compilation and scheduling can affect them. Balanced and high used the same drawing-buffer dimensions because device scale factor was 1. Neither result establishes 60 FPS.
+
+The public entry module is 305,718 bytes; the separate lazy 3D module is 937,385 bytes (gzip 93,446 and 247,728 bytes with Node's default gzip settings). The v0.1.0 build placed about 1.23 MB in its initial JavaScript module. Splitting defers Three.js parsing/loading for non-3D views; opening 3D still loads the large scene module. The complete result and conditions are in [performance.json](performance.json).
+
 Startup timing describes local navigation until the dashboard/3D scene becomes available on the measured machine. Local asset delivery does not measure a first visit to GitHub Pages over a slow network. Initial-module and lazy-chunk sizes describe build output; transferred compressed bytes and parse/compile cost are separate concerns.
 
 `requestAnimationFrame` callback intervals describe browser scheduling cadence. They are not proof that the WebGL renderer produced that many frames. Actual render counters can show a scene settling while animation-frame callbacks continue. Compare active traffic/camera interaction against paused or reduced-motion idle behavior, and record graphics preset, resolution, renderer, and span/node counts.

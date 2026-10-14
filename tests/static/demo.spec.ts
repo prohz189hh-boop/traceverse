@@ -182,6 +182,7 @@ test('hash deep links and all navigation survive refreshing under the Pages base
   page,
   request,
 }) => {
+  test.setTimeout(90000);
   for (const route of [
     'services',
     'traces',

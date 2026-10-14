@@ -1,0 +1,75 @@
+{
+  "measuredAt": "2026-10-14T14:44:03.157Z",
+  "version": "0.2.0",
+  "environment": {
+    "os": "win32 10.0.26300",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz",
+    "browser": "156.0.8078.4",
+    "viewport": [1536, 960],
+    "deviceScaleFactor": 1,
+    "acceleration": "SwiftShader software WebGL explicitly selected"
+  },
+  "conditions": "One fresh browser context per quality; local production static preview; heavy scenario at intensity 1 and speed 1; 5-second active samples and 3-second settled pause samples. No concurrent tests. Startup includes lazy 3D load. These results are not hardware GPU or remote network benchmarks.",
+  "chunks": [
+    {
+      "name": "index-H6eqCI_V.js",
+      "bytes": 305718,
+      "gzipBytes": 93446
+    },
+    {
+      "name": "universe3d-unbm7Cka.js",
+      "bytes": 937385,
+      "gzipBytes": 247728
+    }
+  ],
+  "results": [
+    {
+      "quality": "low",
+      "startupMs": 2473.3483000000006,
+      "elapsedMs": 5415.0999999940395,
+      "renderedFrames": 19,
+      "renderFps": 3.5087071337594713,
+      "rafMedianMs": 33.30000000000018,
+      "rafP95Ms": 1799.9,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawCalls": 25,
+      "triangles": 3462,
+      "particleLimit": 32,
+      "nodes": 9,
+      "drawingBuffer": [944, 550],
+      "pausedFramesOver3Seconds": 0
+    },
+    {
+      "quality": "balanced",
+      "startupMs": 4503.656800000001,
+      "elapsedMs": 5028.9000000059605,
+      "renderedFrames": 96,
+      "renderFps": 19.089661755033152,
+      "rafMedianMs": 33.29999999999927,
+      "rafP95Ms": 133.3000000000011,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawCalls": 26,
+      "triangles": 6982,
+      "particleLimit": 96,
+      "nodes": 9,
+      "drawingBuffer": [944, 550],
+      "pausedFramesOver3Seconds": 0
+    },
+    {
+      "quality": "high",
+      "startupMs": 3988.3431999999957,
+      "elapsedMs": 5074,
+      "renderedFrames": 93,
+      "renderFps": 18.328734726054396,
+      "rafMedianMs": 33.399999999999636,
+      "rafP95Ms": 150,
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "drawCalls": 26,
+      "triangles": 6982,
+      "particleLimit": 160,
+      "nodes": 9,
+      "drawingBuffer": [944, 550],
+      "pausedFramesOver3Seconds": 0
+    }
+  ]
+}

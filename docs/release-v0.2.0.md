@@ -31,7 +31,11 @@ Open http://127.0.0.1:5173. Local Demo runs five actual instrumented Express ser
 
 ## Verification record
 
-[PROGRESS.md](../PROGRESS.md) records actual release checks, publication status, and links to CI/deployment results. [performance.json](performance.json) records measured startup/rendering observations; [the performance guide](performance.md) explains conditions and limits. This release note must be finalized with executed test results before publication.
+TypeScript, ESLint, formatting, 51 unit/integration tests, local production build, static build, all six local Chromium tests, and all six static Chromium tests passed on Windows. Real Node HTTP, Express, Fastify, distributed Express/SQLite, separate Next.js checkout ingestion, and built collector/dashboard smoke checks passed. Dependency audit found zero vulnerabilities; 550 locked licenses were reviewed and browser notices retained. A credential-pattern scan found no matches.
+
+The benchmark used explicit SwiftShader software WebGL: balanced rendered 19.1 frames/second during its short heavy-scenario sample and zero frames during a settled three-second pause. These measurements do not predict hardware GPU or remote network performance. [performance.json](performance.json) contains the actual observations; [the performance guide](performance.md) explains the conditions and substantial variance.
+
+[PROGRESS.md](../PROGRESS.md) records CI, deployment, and remote verification. [Watch the actual demonstration](https://github.com/prohz189hh-boop/traceverse/releases/download/v0.2.0/demo-v0.2.webm).
 
 ## Boundaries
 

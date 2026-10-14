@@ -4,6 +4,8 @@ Changes use [Semantic Versioning](https://semver.org/). Before 1.0, minor releas
 
 ## 0.2.0 — 2026-10-14
 
+Fixed sub-millisecond duration precision by subtracting nanosecond timestamps before converting to milliseconds. Unsafe numeric nanosecond inputs are rejected. Local WebSocket frames are validated and sanitized before dashboard processing.
+
 Explore Your App in 3D.
 
 ### Added

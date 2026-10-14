@@ -10,10 +10,11 @@ Target: a tested MIT-licensed v0.2.0 upgrade and public synthetic-only GitHub Pa
 - Fixed nanosecond duration precision and unsafe numeric OTLP timestamps. Collector WebSocket frames are validated/sanitized before graph processing.
 - `npm run check` passed: TypeScript, ESLint, formatting, 51 unit/integration tests, and local production build. Static build passed. Production smoke passed with built dashboard/assets and real ingestion. Official Node HTTP/Express/Fastify fixtures passed; separate Next.js checkout trace passed.
 - Six static Chromium tests passed: 3D/inspector/camera, all scenarios, 2D/keyboard/settings, replay/synthetic-only import, hash refresh/assets/notices, mobile/offline. Actual screenshots and `docs/assets/demo-v0.2.webm` captured.
-- Local browser checks: first run exposed two outdated text assertions, now corrected. One later run timed out during a camera click while other builds/tests ran concurrently; five other cases passed. A final isolated browser run is still required.
+- Final isolated browser verification passed: all six local tests (54.4 seconds) and all six static tests (1.7 minutes). Earlier text assertion failures were corrected; a camera-click timeout under concurrent verification did not recur in the isolated run.
 - License audit reviewed 550 locked dependencies with no unresolved expressions; zero npm audit vulnerabilities. Browser builds retain 61 full upstream notices and checked-in source texts. Credential-pattern scan found no matches.
 - GitHub Pages setting successfully enabled with `build_type=workflow` and HTTPS. Workflow builds/tests public output before deployment. No public deployment or v0.2.0 release is claimed yet.
-- Remaining: measured benchmark and documentation results; final isolated local/static browser checks; commit/push; green cross-platform CI and Pages deployment; verify deployed URL; publish tagged release and actual video; record completion.
+- Benchmark completed: Windows/i7-1165G7, Chromium 156, explicitly selected SwiftShader software WebGL, five-second heavy-scenario samples. Balanced 19.1 actual renders/second; navigation to first 3D frame 2.47–4.50 seconds across presets; all presets settled to zero rendered frames over a three-second pause sample. Low had substantial initial stalls, so the sample cannot rank presets or predict hardware GPU performance. Full measurements: `docs/performance.json`.
+- Saved implementation milestone as commit `0b33c9f`. Remaining: push tested update; green cross-platform CI and Pages deployment; verify deployed URL; publish tagged release and actual video; record completion.
 
 ## v0.1.0 verified release history
 
