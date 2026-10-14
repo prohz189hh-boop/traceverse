@@ -185,18 +185,16 @@ export async function createCollector(options: CollectorOptions = {}) {
       typeof error.statusCode === 'number'
         ? error.statusCode
         : 500;
-    return reply
-      .code(status)
-      .send({
-        error:
-          status === 413
-            ? 'Payload too large'
-            : status === 429
-              ? 'Rate limit exceeded'
-              : status < 500
-                ? 'Invalid request'
-                : 'Collector request failed',
-      });
+    return reply.code(status).send({
+      error:
+        status === 413
+          ? 'Payload too large'
+          : status === 429
+            ? 'Rate limit exceeded'
+            : status < 500
+              ? 'Invalid request'
+              : 'Collector request failed',
+    });
   });
   app.addHook('onClose', async () => {
     clearInterval(batchTimer);
