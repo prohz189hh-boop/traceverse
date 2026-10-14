@@ -2,6 +2,7 @@ import { build } from 'esbuild';
 import { build as viteBuild } from 'vite';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { generateNotices } from './notices.mjs';
 const external = [];
 for (const group of ['apps', 'packages', 'examples']) {
   for (const name of readdirSync(group)) {
@@ -15,6 +16,7 @@ for (const group of ['apps', 'packages', 'examples']) {
     }
   }
 }
+await generateNotices();
 await viteBuild({ root: 'apps/web' });
 for (const entry of ['apps/collector', 'examples/express-demo']) {
   await build({

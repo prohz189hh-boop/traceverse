@@ -2,6 +2,10 @@ name: Feature request
 description: Propose a useful improvement with a concrete use case.
 title: '[Feature]: '
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep examples synthetic or sanitized. The public demo must remain free, static, and isolated from real telemetry; the local application supports real OpenTelemetry traces.
   - type: textarea
     id: problem
     attributes:
@@ -16,6 +20,11 @@ body:
       description: Describe the result you would expect in TraceVerse.
     validations:
       required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Smallest useful outcome
+      description: Suggest a focused acceptance criterion and identify whether this affects the public demo, local app, or SDK.
   - type: textarea
     id: alternatives
     attributes:

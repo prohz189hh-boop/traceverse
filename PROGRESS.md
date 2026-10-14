@@ -1,6 +1,21 @@
 # TraceVerse progress
 
-Target: a truthful, working MIT-licensed v0.1.0 release.
+Target: a tested MIT-licensed v0.2.0 upgrade and public synthetic-only GitHub Pages demo.
+
+## v0.2.0 resume checkpoint — 2026-10-14
+
+- Resumed existing `main` from `09f36d0`. Preserved and reviewed interrupted dashboard, renderer, documentation, and build changes; no restart or new repository.
+- Implemented separate `/traceverse/` public static build, hash navigation, synthetic-only source/import/replay boundaries, separate browser storage, and no collector transport. Five interactive scenarios cover nine entities, with bounded traffic, speed, pause, and replay controls.
+- Renderer now has reusable resources, indexed observations, stable category layouts, capped instanced particles, camera controls, readable projected labels, low/balanced/high presets, reduced motion, demand rendering, and 2D fallback. Three.js is lazy loaded.
+- Fixed nanosecond duration precision and unsafe numeric OTLP timestamps. Collector WebSocket frames are validated/sanitized before graph processing.
+- `npm run check` passed: TypeScript, ESLint, formatting, 51 unit/integration tests, and local production build. Static build passed. Production smoke passed with built dashboard/assets and real ingestion. Official Node HTTP/Express/Fastify fixtures passed; separate Next.js checkout trace passed.
+- Six static Chromium tests passed: 3D/inspector/camera, all scenarios, 2D/keyboard/settings, replay/synthetic-only import, hash refresh/assets/notices, mobile/offline. Actual screenshots and `docs/assets/demo-v0.2.webm` captured.
+- Local browser checks: first run exposed two outdated text assertions, now corrected. One later run timed out during a camera click while other builds/tests ran concurrently; five other cases passed. A final isolated browser run is still required.
+- License audit reviewed 550 locked dependencies with no unresolved expressions; zero npm audit vulnerabilities. Browser builds retain 61 full upstream notices and checked-in source texts. Credential-pattern scan found no matches.
+- GitHub Pages setting successfully enabled with `build_type=workflow` and HTTPS. Workflow builds/tests public output before deployment. No public deployment or v0.2.0 release is claimed yet.
+- Remaining: measured benchmark and documentation results; final isolated local/static browser checks; commit/push; green cross-platform CI and Pages deployment; verify deployed URL; publish tagged release and actual video; record completion.
+
+## v0.1.0 verified release history
 
 ## Current status
 

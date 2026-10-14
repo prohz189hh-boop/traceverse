@@ -1,11 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { NormalizedSpan, StreamMessage } from '@traceverse/core';
+import { validateSession } from '@traceverse/core';
 
 export type Mode = 'demo' | 'live' | 'synthetic' | 'replay';
+export const STATIC_DEMO = import.meta.env.VITE_TRACEVERSE_STATIC_DEMO === 'true';
+export const SESSION_STORAGE_KEY = STATIC_DEMO
+  ? 'traceverse-public-synthetic-sessions-v2'
+  : 'traceverse-sessions-v1';
 export interface Settings {
   theme: 'dark' | 'light';
-  quality: 'auto' | 'low' | 'high';
+  quality: 'auto' | 'low' | 'balanced' | 'high';
   reducedMotion: boolean;
   particleDensity: number;
   intensity: number;
@@ -18,7 +23,7 @@ export interface Settings {
 }
 const defaultSettings: Settings = {
   theme: 'dark',
-  quality: 'auto',
+  quality: 'balanced',
   reducedMotion:
     typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
   particleDensity: 1,
@@ -39,7 +44,20 @@ export const usePreferences = create<{
       settings: defaultSettings,
       setSettings: (s) => set((state) => ({ settings: { ...state.settings, ...s } })),
     }),
-    { name: 'traceverse-preferences-v1' },
+    {
+      name: STATIC_DEMO ? 'traceverse-public-preferences-v2' : 'traceverse-preferences-v1',
+      merge: (persisted, current) => {
+        const saved = (persisted as { settings?: Partial<Settings> } | undefined)?.settings || {};
+        return {
+          ...current,
+          settings: {
+            ...defaultSettings,
+            ...saved,
+            quality: saved.quality === 'auto' ? 'balanced' : saved.quality || 'balanced',
+          },
+        };
+      },
+    },
   ),
 );
 export function mergeSpans(
@@ -80,11 +98,9 @@ export function connectCollector(
       socket.onmessage = (event) => {
         if (stopped) return;
         try {
-          const data = JSON.parse(String(event.data)) as StreamMessage;
-          if (['snapshot', 'batch', 'reset'].includes(data.type) && Array.isArray(data.spans))
-            onMessage(data);
+          onMessage(validateStreamMessage(JSON.parse(String(event.data))));
         } catch {
-          /* Ignore invalid frames; the collector validates normalized telemetry. */
+          /* Ignore malformed frames so a bad local response cannot break the dashboard. */
         }
       };
       socket.onclose = () => {
@@ -108,59 +124,17 @@ export function connectCollector(
     }
   };
 }
-export function syntheticSpans(): NormalizedSpan[] {
-  const result: NormalizedSpan[] = [];
-  const start = Date.now() - 60000;
-  const flow = [
-    ['web-frontend', 'GET /checkout', -1, 'frontend'],
-    ['api-gateway', 'POST /orders', 0, 'service'],
-    ['user-service', 'GET /users/:id', 1, 'service'],
-    ['order-service', 'create order', 1, 'service'],
-    ['order-service', 'SELECT orders', 3, 'database'],
-    ['payment-provider', 'POST /authorize', 3, 'external'],
-  ] as const;
-  for (let trace = 0; trace < 36; trace++) {
-    const traceId = (trace + 1).toString(16).padStart(32, '0');
-    for (let i = 0; i < flow.length; i++) {
-      const f = flow[i]!;
-      const error = trace % 11 === 5 && (i === 1 || i === 3 || i === 5);
-      const slow = trace % 8 === 3 && i === 4;
-      const duration = slow ? 820 + i * 13 : 45 + i * 18 + (trace % 7) * 9;
-      result.push({
-        traceId,
-        spanId: (trace * 10 + i + 1).toString(16).padStart(16, '0'),
-        parentSpanId:
-          f[2] === -1 ? undefined : (trace * 10 + f[2] + 1).toString(16).padStart(16, '0'),
-        serviceName: f[0],
-        operation: f[1],
-        startTime: start + trace * 1500 + i * 20,
-        durationMs: duration,
-        status: error ? 'error' : 'ok',
-        kind: i === 4 ? 3 : 2,
-        attributes: {
-          'traceverse.synthetic': true,
-          'traceverse.category': f[3],
-          ...(i === 4 ? { 'db.system': 'sqlite', 'db.name': 'orders' } : {}),
-          ...(i === 5 ? { 'server.address': 'payment.local' } : {}),
-          'http.route': f[1],
-        },
-        events: error
-          ? [
-              {
-                name: 'exception',
-                time: start + trace * 1500 + duration,
-                attributes: {
-                  'exception.type': 'PaymentUnavailable',
-                  'exception.message': 'Synthetic payment provider timeout',
-                },
-              },
-            ]
-          : [],
-        source: 'synthetic',
-      });
-    }
-  }
-  return result;
+export function validateStreamMessage(input: unknown): StreamMessage {
+  if (!input || typeof input !== 'object') throw new Error('Invalid collector frame');
+  const message = input as Partial<StreamMessage>;
+  if (!['snapshot', 'batch', 'reset'].includes(String(message.type)))
+    throw new Error('Invalid collector frame type');
+  const session = validateSession({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    spans: message.spans,
+  });
+  return { type: message.type as StreamMessage['type'], spans: session.spans };
 }
 export function download(filename: string, value: unknown) {
   const blob = new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' });

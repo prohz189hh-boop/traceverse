@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-public
 .next
 package-lock.json
 playwright-report

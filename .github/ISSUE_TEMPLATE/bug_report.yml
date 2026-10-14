@@ -10,21 +10,21 @@ body:
     id: version
     attributes:
       label: TraceVerse version or commit
-      placeholder: v0.1.0
+      placeholder: v0.2.0 or a commit SHA
     validations:
       required: true
   - type: input
     id: environment
     attributes:
       label: Environment
-      description: OS, Node version, and browser/version if relevant.
+      description: OS and browser/version; Node version for the local app. For graphics problems, include quality preset, reduced-motion setting, and graphics renderer if known.
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
       label: Steps to reproduce
-      description: Include the exact command and a small sanitized example.
+      description: Include the public-demo route/scenario or exact local command, and a small sanitized example. Do not attach real private trace exports.
     validations:
       required: true
   - type: textarea
@@ -41,12 +41,29 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: build
+    attributes:
+      label: Application build
+      options:
+        - Public GitHub Pages demo
+        - Local static preview (4173/traceverse/)
+        - Local development application (5173)
+        - Local production application (4318)
+        - SDK or collector only
+    validations:
+      required: true
+  - type: dropdown
     id: mode
     attributes:
       label: Dashboard mode
       options:
         - Live
         - Demo (real local services)
-        - Synthetic
+        - Synthetic (bundled demonstration data)
         - Replay
         - Not applicable
+  - type: input
+    id: scenario
+    attributes:
+      label: Scenario, route, or affected control
+      placeholder: Slow database, /traceverse/#/traces, reset camera, or a sanitized operation name

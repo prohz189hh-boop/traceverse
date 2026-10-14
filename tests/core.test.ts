@@ -57,6 +57,20 @@ function span(overrides: Partial<NormalizedSpan> = {}): NormalizedSpan {
   };
 }
 describe('OTLP normalization and privacy', () => {
+  it('preserves nanosecond duration precision without subtracting rounded Unix millisecond values', () => {
+    const [result] = normalizeOtlp(
+      payload({
+        startTimeUnixNano: '1791975600000000000',
+        endTimeUnixNano: '1791975600025000001',
+      }),
+    );
+    expect(result?.durationMs).toBe(25.000001);
+  });
+  it('rejects timestamps already rounded by unsafe JSON numeric encoding', () => {
+    expect(() => normalizeOtlp(payload({ startTimeUnixNano: 1791975600000000000 }))).toThrow(
+      'Unsafe numeric timestamp',
+    );
+  });
   it('decodes official HTTP JSON timestamps, IDs, source and safe typed attributes', () => {
     const [result] = normalizeOtlp(
       payload({ attributes: [{ key: 'http.response.status_code', value: { intValue: '200' } }] }),

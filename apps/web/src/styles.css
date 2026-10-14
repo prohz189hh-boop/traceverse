@@ -2661,7 +2661,454 @@ td code {
 .trace-filter-row + .error-list {
   height: 459px;
 }
+
+/* The v0.2 control center preserves the existing views and adds a clearer HUD. */
+.app-shell {
+  background: radial-gradient(ellipse at 65% 0, #15152b65, transparent 55%), var(--bg);
+}
+.topbar {
+  background: #09121ff2;
+  backdrop-filter: blur(14px);
+  border-bottom-color: #294252;
+}
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #29394e;
+  border-radius: 8px;
+  background: #111a2a;
+  padding: 7px 10px;
+  margin-left: auto;
+  width: clamp(130px, 16vw, 235px);
+  color: #87a2bd;
+}
+.topbar-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+}
+.topbar-search kbd {
+  font-size: 10px;
+  border: 1px solid #34445b;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+.topbar-right {
+  margin-left: 15px;
+}
+.mobile-filters {
+  display: none;
+}
+.main-panel,
+.inspector {
+  border-color: #2a3c54;
+  box-shadow: 0 18px 55px #0003;
+}
+.main-panel {
+  border-top-color: #477479;
+}
+.inspector {
+  border-top-color: #685d98;
+}
+.universe-viewport {
+  height: 550px;
+  background:
+    radial-gradient(ellipse at 48% 60%, #143a493b, transparent 55%),
+    radial-gradient(ellipse at 75% 18%, #402b652c, transparent 40%), #070d18;
+}
+.viewport-badge {
+  color: #a6dfdb;
+  font-size: 9px;
+  letter-spacing: 1px;
+  border-color: #34575a;
+  background: #0c1c28e6;
+  box-shadow: 0 0 22px #46cec311;
+}
+.node-label {
+  border-color: #40556fbb;
+  background: #101b2aec;
+  box-shadow: 0 4px 18px #0007;
+  padding: 7px 11px;
+}
+.node-label b {
+  font-size: 11px;
+}
+.node-label span {
+  font-size: 9px;
+  color: #a2b8cb;
+}
+.graph-legend span,
+.graph-help {
+  font-size: 10px;
+  color: #b3c9d9;
+}
+.metric-label {
+  font-size: 11px;
+  color: #a1b5c9;
+}
+.metric-detail {
+  font-size: 10px;
+  line-height: 1.5;
+}
+.metric-card {
+  background: linear-gradient(135deg, #111c2a, #101629);
+  border-color: #293b52;
+}
+.service-name {
+  font-size: 12px;
+}
+.service-name small {
+  font-size: 9px;
+}
+.demo-tutorial {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #453d65;
+  border-radius: 8px;
+  background: #211b343d;
+  color: #b9b0dc;
+}
+.demo-tutorial > svg {
+  flex-shrink: 0;
+  color: #b19cff;
+}
+.demo-tutorial p {
+  font-size: 11px;
+  line-height: 1.65;
+  flex: 1;
+}
+.demo-tutorial b {
+  color: #ded8f4;
+  margin-right: 6px;
+}
+.scenario-console {
+  padding-bottom: 18px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #344159;
+}
+.scenario-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #88e5d9;
+  margin-bottom: 14px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.scenario-heading span {
+  margin-left: auto;
+  font-size: 8px;
+  padding: 3px 6px;
+  border: 1px solid #675687;
+  border-radius: 3px;
+  color: #c1adea;
+}
+.scenario-controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.scenario-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 125px;
+  min-width: 0;
+}
+.scenario-controls label:first-child {
+  flex-basis: 180px;
+}
+.scenario-controls label > span {
+  font-size: 10px;
+  color: #a2b3c9;
+}
+.scenario-controls select {
+  width: 100%;
+  min-width: 0;
+  font-size: 11px;
+  height: 36px;
+}
+.scenario-controls .traffic-control input {
+  width: 100%;
+  padding: 0;
+  height: 36px;
+  border: 0;
+  background: transparent;
+}
+.traffic-control b {
+  color: #78d8d0;
+  margin-left: 8px;
+}
+.scenario-controls > button {
+  min-height: 36px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.scenario-console > p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #9bb1c5;
+  margin-top: 13px;
+}
+.scenario-evidence {
+  margin-top: 20px;
+  padding: 13px;
+  border: 1px solid #365960;
+  background: #122c3144;
+  border-radius: 7px;
+}
+.scenario-evidence.slow {
+  border-color: #735c38;
+  background: #32281a55;
+}
+.scenario-evidence.error {
+  border-color: #704255;
+  background: #351a2555;
+}
+.scenario-evidence > span {
+  color: #8fcbca;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.scenario-evidence h3 {
+  margin: 8px 0;
+  font-size: 13px;
+}
+.scenario-evidence p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #a5bccd;
+}
+.scenario-evidence .text-button {
+  font-size: 11px;
+  padding: 10px 0 0;
+}
+.inspector-section h3,
+.health-line,
+.inspector-stats span,
+.inspector-explanation {
+  font-size: 11px;
+}
+.recent-trace b,
+.recent-trace small,
+.waterfall-name b,
+.waterfall-name small,
+.waterfall-item p,
+.span-events span {
+  font-size: 10px;
+}
+.trace-attributes,
+.trace-attributes b,
+.trace-attributes pre {
+  font-size: 10px;
+}
+.trace-meta,
+.trace-details > h3,
+.activity-header,
+.playback-row {
+  font-size: 10px;
+}
+.activity-header b {
+  font-size: 11px;
+}
+.playback-button {
+  width: 34px;
+  height: 34px;
+}
+.source-notice {
+  font-size: 11px;
+}
+.source-notice span {
+  font-size: 11px;
+}
+[data-theme='light'] .topbar {
+  background: #f7fafcf2;
+}
+[data-theme='light'] .topbar-search {
+  background: #edf4f8;
+  border-color: #c7d8e4;
+}
+[data-theme='light'] .metric-card {
+  background: linear-gradient(135deg, #fafdff, #edf4f9);
+}
+[data-theme='light'] .scenario-console > p,
+[data-theme='light'] .scenario-controls label > span,
+[data-theme='light'] .scenario-evidence p {
+  color: #55758a;
+}
+@media (min-width: 1750px) {
+  .universe-viewport {
+    height: 630px;
+  }
+}
+@media (max-width: 1250px) {
+  .workspace-crumb {
+    display: none;
+  }
+  .topbar-search {
+    margin-left: 18px;
+    width: clamp(130px, 21vw, 250px);
+  }
+  .topbar-right {
+    margin-left: auto;
+  }
+  .universe-viewport {
+    height: 510px;
+  }
+  .toolbar-actions .camera-rotate {
+    display: none;
+  }
+}
+@media (max-width: 1000px) {
+  .universe-viewport {
+    height: 530px;
+  }
+  .metric-label {
+    font-size: 10px;
+  }
+  .metric-detail {
+    font-size: 9px;
+  }
+}
 @media (max-width: 720px) {
+  .topbar-search {
+    display: none;
+  }
+  .topbar-right {
+    gap: 5px;
+    margin-left: auto;
+  }
+  .source-select select {
+    max-width: 135px;
+    font-size: 10px;
+  }
+  .main-content {
+    padding: 19px 12px 0;
+  }
+  .mobile-filters {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .mobile-filters label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px;
+  }
+  .mobile-filters input {
+    width: 100%;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-size: 11px;
+  }
+  .mobile-filters select {
+    width: 45%;
+    min-width: 0;
+    font-size: 11px;
+  }
+  .universe-viewport {
+    height: 440px;
+  }
+  .panel-toolbar {
+    padding: 0 10px;
+  }
+  .toolbar-actions {
+    gap: 0;
+  }
+  .toolbar-rule {
+    margin: 0 3px;
+  }
+  .toolbar-actions .icon-button {
+    width: 26px;
+  }
+  .panel-title {
+    gap: 5px;
+  }
+  .panel-title > b {
+    font-size: 10px;
+  }
+  .node-label {
+    padding: 5px 7px;
+    min-width: 70px;
+  }
+  .node-label b {
+    font-size: 10px;
+  }
+  .node-label span {
+    font-size: 8px;
+  }
+  .metric-label {
+    font-size: 10px;
+  }
+  .metric-detail {
+    font-size: 9px;
+  }
+  .demo-tutorial {
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px;
+    margin-bottom: 14px;
+  }
+  .demo-tutorial > svg {
+    margin-top: 3px;
+  }
+  .scenario-controls {
+    gap: 10px;
+  }
+  .scenario-controls label:first-child {
+    flex-basis: 100%;
+  }
+  .scenario-controls label {
+    flex-basis: calc(50% - 5px);
+  }
+  .scenario-controls > button {
+    flex: 1;
+    justify-content: center;
+  }
+  .scenario-console > p {
+    font-size: 10px;
+  }
+  .graph-legend {
+    gap: 9px;
+    left: 12px;
+  }
+  .graph-legend span {
+    font-size: 9px;
+  }
+  .graph-help {
+    display: none;
+  }
+  .activity-header > span {
+    font-size: 8px;
+  }
+  .playback-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .playback-row input[type='range'] {
+    min-width: 80px;
+  }
+  .inspector-default {
+    grid-template-columns: 1fr;
+  }
+  .main-footer {
+    font-size: 9px;
+  }
   .panel-search {
     width: 150px;
     font-size: 8px;

@@ -157,7 +157,7 @@ test('accessible graph, filtering, pause, and persisted performance settings wor
   await expect(page.locator('.service-list .service-item')).toHaveCount(1);
   await page.getByLabel('Filter service type').selectOption('all');
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
-  await expect(page.getByText('Visualization paused', { exact: true })).toBeVisible();
+  await expect(page.getByText('Paused · resume to continue', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Resume', exact: true }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Graphics quality').selectOption('low');
@@ -187,7 +187,7 @@ test('synthetic sample works offline without mixing it with live telemetry', asy
     page.getByText('Your universe starts with one trace.', { exact: true }),
   ).toBeVisible();
   await page.getByLabel('Data source').selectOption('synthetic');
-  await expect(page.getByText('Deterministic interface preview.', { exact: false })).toBeVisible();
+  await expect(page.getByTestId('scenario-controls')).toContainText('SYNTHETIC');
   await expect(page.getByRole('button', { name: 'api-gateway', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '2D view', exact: true }).click();
   await context.setOffline(true);

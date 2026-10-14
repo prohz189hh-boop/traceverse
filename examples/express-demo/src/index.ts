@@ -76,7 +76,7 @@ export async function startDemo(options: DemoOptions = {}) {
       ],
     });
     providers.set(name, provider);
-    tracers.set(name, provider.getTracer('traceverse-express-demo', '0.1.0'));
+    tracers.set(name, provider.getTracer('traceverse-express-demo', '0.2.0'));
   }
   const flush = async () => {
     await Promise.all([...providers.values()].map((provider) => provider.forceFlush()));

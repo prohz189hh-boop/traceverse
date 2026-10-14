@@ -1,5 +1,7 @@
 # Real local demo
 
+This guide runs actual instrumented HTTP services and SQLite queries on your computer. To explore the browser-only synthetic demo without installing anything, use [the public demo guide](public-demo.md).
+
 ```sh
 npm install
 npm run demo

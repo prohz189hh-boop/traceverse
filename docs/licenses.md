@@ -4,7 +4,9 @@ TraceVerse's original source is licensed under [MIT](../LICENSE). Dependencies r
 
 Run `npm run audit:licenses` after a clean install to generate [dependency-licenses.json](dependency-licenses.json). The inventory covers the lockfile's packages, including optional/platform-specific dependencies that may not be installed on your machine. It is metadata plus narrowly reviewed exceptions, not a substitute for each package's license text. Installed packages retain their upstream notices and licenses.
 
-The v0.1.0 release publishes TraceVerse source and a lockfile. It does not redistribute `node_modules`, the optional libvips binaries, or a bundled installer. Any future binary/installer distribution needs its own complete notices and review of the exact distributed artifacts.
+Source releases publish TraceVerse source and a lockfile without `node_modules`, optional libvips binaries, or a bundled installer. The v0.2.0 GitHub Pages demo also redistributes compiled browser dependencies. Its generated `third-party-notices.txt` preserves the full upstream notices for that selected dependency closure, including MIT and Apache-licensed packages; it is served alongside the demo at [third-party-notices.txt](https://prohz189hh-boop.github.io/traceverse/third-party-notices.txt).
+
+The lockfile inventory includes development tools and optional Next.js packages that do not all ship in the browser bundle. MPL-licensed CSS tooling is used during builds and is not browser runtime code; optional LGPL libvips binaries are not included in the static site. Any future binary/installer distribution needs complete notices and review of its exact distributed artifacts.
 
 ## Reviewed exceptions
 
@@ -18,6 +20,10 @@ The v0.1.0 release publishes TraceVerse source and a lockfile. It does not redis
 The reviewed cases do not create a general allowlist for unrelated dependencies or future versions. Do not remove upstream notices or change a package's license label to make a check pass. New missing/unknown licenses need an explicit source review.
 
 Browser support data used by `caniuse-lite` comes from **caniuse.com**. TraceVerse makes no modifications to that upstream dataset.
+
+## Browser notice generation
+
+Both builds run `scripts/notices.mjs` offline. Packages that omit license files use checked-in upstream texts in `docs/license-sources`, with their source URLs. The selected closure excludes native Tailwind tooling and Drei's unused StatsGl widget. The scene imports only Drei's OrbitControls module; camera controls do not load the unused statistics widget, vision models, or Draco decoders. Some optional dependency notices are included conservatively even though their modules are removed from the optimized build.
 
 ## webgl-constants 1.1.1 notice
 

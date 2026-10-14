@@ -30,6 +30,8 @@ import {
   Upload,
   Waypoints,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import {
   buildGraph,
@@ -50,17 +52,19 @@ import {
   connectCollector,
   download,
   mergeSpans,
-  syntheticSpans,
+  SESSION_STORAGE_KEY,
+  STATIC_DEMO,
   usePreferences,
   type Mode,
 } from './store';
+import { assertSynthetic, createScenario, scenarios, type ScenarioId } from './scenarios';
 
 const Universe = lazy(() =>
-  import('@traceverse/visualization').then((m) => ({ default: m.Universe })),
+  import('@traceverse/visualization/3d').then((m) => ({ default: m.Universe })),
 );
 type Page = 'overview' | 'services' | 'traces' | 'errors' | 'performance' | 'sessions' | 'docs';
 const navigation = [
-  ['overview', 'Overview', Waypoints],
+  ['overview', 'Universe', Waypoints],
   ['services', 'Services', Box],
   ['traces', 'Traces', GitBranch],
   ['errors', 'Errors', AlertTriangle],
@@ -68,6 +72,19 @@ const navigation = [
   ['sessions', 'Sessions', Layers],
   ['docs', 'Documentation', Code2],
 ] as const;
+
+function pageFromHash(): Page {
+  const value = window.location.hash.replace(/^#\/?/, '');
+  return value === 'universe'
+    ? 'overview'
+    : navigation.some(([id]) => id === value)
+      ? (value as Page)
+      : 'overview';
+}
+function initialScenario(): ScenarioId {
+  const value = new URLSearchParams(window.location.search).get('scenario');
+  return scenarios.find((scenario) => scenario.id === value)?.id || 'success';
+}
 type SavedSession = { name: string; session: Session };
 const time = (n: number) =>
   new Date(n).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -81,11 +98,13 @@ function sessionOf(spans: NormalizedSpan[]): Session {
 }
 function readHistory(): SavedSession[] {
   try {
-    const raw: unknown = JSON.parse(localStorage.getItem('traceverse-sessions-v1') || '[]');
+    const raw: unknown = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || '[]');
     if (!Array.isArray(raw)) return [];
     return raw.slice(0, 6).flatMap((item) => {
       try {
-        return [{ name: String(item.name).slice(0, 128), session: validateSession(item.session) }];
+        const session = validateSession(item.session);
+        if (STATIC_DEMO) assertSynthetic(session.spans);
+        return [{ name: String(item.name).slice(0, 128), session }];
       } catch {
         return [];
       }
@@ -108,8 +127,8 @@ function IconFor({ category }: { category: Category }) {
 
 export default function App() {
   const { settings, setSettings } = usePreferences();
-  const [page, setPage] = useState<Page>('overview'),
-    [mode, setMode] = useState<Mode>('demo'),
+  const [page, setPageState] = useState<Page>(pageFromHash),
+    [mode, setMode] = useState<Mode>(STATIC_DEMO ? 'synthetic' : 'demo'),
     [received, setReceived] = useState<NormalizedSpan[]>([]),
     [status, setStatus] = useState<'connecting' | 'connected' | 'offline'>('connecting');
   const [paused, setPaused] = useState(false),
@@ -125,6 +144,7 @@ export default function App() {
     [isolated, setIsolated] = useState(false),
     [resetVersion, setResetVersion] = useState(0),
     [focusVersion, setFocusVersion] = useState(0);
+  const [cameraCommand, setCameraCommand] = useState<UniverseProps['cameraCommand']>();
   const [settingsOpen, setSettingsOpen] = useState(false),
     [toast, setToast] = useState(''),
     [history, setHistory] = useState<SavedSession[]>(readHistory),
@@ -135,21 +155,52 @@ export default function App() {
   const fileRef = useRef<HTMLInputElement>(null),
     [connectionDraft, setConnectionDraft] = useState(settings.collectorUrl),
     [clearing, setClearing] = useState(false);
-  const synthetic = useMemo(syntheticSpans, []);
-  useEffect(
-    () =>
-      connectCollector(
-        settings.collectorUrl,
-        (m) =>
-          setReceived((old) =>
-            m.type === 'batch'
-              ? mergeSpans(old, m.spans, settings.maxSpans)
-              : mergeSpans([], m.spans, settings.maxSpans),
-          ),
-        setStatus,
-      ),
-    [settings.collectorUrl, settings.maxSpans],
-  );
+  const [scenario, setScenario] = useState<ScenarioId>(initialScenario),
+    [trafficIntensity, setTrafficIntensity] = useState(1),
+    [playbackSpeed, setPlaybackSpeed] = useState(1),
+    [synthetic, setSynthetic] = useState<NormalizedSpan[]>(() => createScenario(initialScenario())),
+    [tutorialOpen, setTutorialOpen] = useState(STATIC_DEMO);
+  const scenarioSequence = useRef(0);
+  const activeScenario = scenarios.find((value) => value.id === scenario)!;
+  function setPage(value: Page) {
+    window.location.hash = `/${value === 'overview' ? 'universe' : value}`;
+    setPageState(value);
+  }
+  useEffect(() => {
+    const navigate = () => setPageState(pageFromHash());
+    window.addEventListener('hashchange', navigate);
+    if (!window.location.hash)
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${window.location.search}#/universe`,
+      );
+    return () => window.removeEventListener('hashchange', navigate);
+  }, []);
+  useEffect(() => {
+    if (STATIC_DEMO) return;
+    return connectCollector(
+      settings.collectorUrl,
+      (m) =>
+        setReceived((old) =>
+          m.type === 'batch'
+            ? mergeSpans(old, m.spans, settings.maxSpans)
+            : mergeSpans([], m.spans, settings.maxSpans),
+        ),
+      setStatus,
+    );
+  }, [settings.collectorUrl, settings.maxSpans]);
+  useEffect(() => {
+    if (mode !== 'synthetic' || paused) return;
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      const batch = Array.from({ length: trafficIntensity }, () =>
+        createScenario(scenario, { sequence: ++scenarioSequence.current }),
+      ).flat();
+      setSynthetic((old) => mergeSpans(old, batch, 2400));
+    }, 1600 / playbackSpeed);
+    return () => clearInterval(timer);
+  }, [mode, paused, scenario, trafficIntensity, playbackSpeed]);
   useEffect(() => {
     document.documentElement.dataset.theme = settings.theme;
   }, [settings.theme]);
@@ -159,7 +210,13 @@ export default function App() {
       if (e.key === 'Escape') setSettingsOpen(false);
       if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
         e.preventDefault();
-        document.querySelector<HTMLInputElement>('input[aria-label="Search services"]')?.focus();
+        document
+          .querySelector<HTMLInputElement>(
+            window.matchMedia('(max-width: 720px)').matches
+              ? 'input[aria-label="Filter mobile services"]'
+              : 'input[aria-label="Search universe"]',
+          )
+          ?.focus();
       }
     };
     window.addEventListener('keydown', key);
@@ -172,7 +229,8 @@ export default function App() {
   }, [toast]);
   useEffect(() => {
     try {
-      localStorage.setItem('traceverse-sessions-v1', JSON.stringify(history));
+      if (STATIC_DEMO) history.forEach((item) => assertSynthetic(item.session.spans));
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(history));
     } catch {
       setToast('Local session storage is full. Export your session to keep it.');
     }
@@ -216,6 +274,11 @@ export default function App() {
   const selectedNode = graph.nodes.find((n) => n.id === selected),
     edge = graph.edges.find((e) => e.id === selectedEdge);
   const serviceSpans = selectedNode ? observedSpansForNode(spans, selectedNode) : spans;
+  const latestServiceSpan = serviceSpans.reduce<NormalizedSpan | undefined>(
+    (latest, span) => (!latest || span.startTime > latest.startTime ? span : latest),
+    undefined,
+  );
+  const selectedHasCurrentError = latestServiceSpan?.status === 'error';
   const errors = serviceSpans.filter(
       (s) =>
         s.status === 'error' &&
@@ -293,10 +356,12 @@ export default function App() {
     latencyThreshold: settings.latencyThreshold,
     resetVersion,
     focusVersion,
+    cameraCommand,
     direction,
     replay: mode === 'replay' || mode === 'synthetic',
   };
   function changeMode(value: Mode) {
+    if (STATIC_DEMO && value !== 'synthetic' && value !== 'replay') return;
     if (value === 'replay' && !replaySession) {
       setReplaySession(sessionOf(base));
       setReplayPosition(0);
@@ -308,6 +373,27 @@ export default function App() {
     setTraceId(null);
     setSelectedEdge(null);
   }
+  function runScenario(value: ScenarioId = scenario) {
+    const batch = createScenario(value, { sequence: ++scenarioSequence.current });
+    setScenario(value);
+    setSynthetic(batch);
+    setMode('synthetic');
+    setPaused(false);
+    setPlaying(false);
+    setSelected(scenarios.find((item) => item.id === value)!.focus);
+    setSelectedEdge(null);
+    setTraceId(null);
+    setSearch('');
+    setCategory('all');
+    setIsolated(false);
+    setTraceSearch('');
+    setPage('overview');
+    setFocusVersion((old) => old + 1);
+  }
+  function replayScenario() {
+    replay(sessionOf(createScenario(scenario, { sequence: ++scenarioSequence.current })));
+    setPlaying(true);
+  }
   function togglePause() {
     if (mode === 'replay') {
       if (replayPosition >= 1) setReplayPosition(0);
@@ -318,6 +404,7 @@ export default function App() {
     }
   }
   function exportSession() {
+    if (STATIC_DEMO) assertSynthetic(base);
     download(
       `traceverse-${mode}-${new Date().toISOString().slice(0, 10)}.json`,
       sessionOf(mode === 'replay' ? replaySession?.spans || [] : base),
@@ -325,6 +412,7 @@ export default function App() {
     setToast('Session exported. Safe attributes only; no request bodies.');
   }
   function saveSession() {
+    if (STATIC_DEMO) assertSynthetic(base);
     if (!base.length) {
       setToast('Capture some telemetry before saving a session.');
       return;
@@ -334,6 +422,7 @@ export default function App() {
     setToast('Session saved in this browser.');
   }
   function replay(session: Session) {
+    if (STATIC_DEMO) assertSynthetic(session.spans);
     setReplaySession(session);
     setMode('replay');
     setReplayPosition(0);
@@ -348,6 +437,7 @@ export default function App() {
     try {
       if (file.size > 10 * 1024 * 1024) throw new Error('Session exceeds the 10 MB import limit.');
       const session = validateSession(JSON.parse(await file.text()));
+      if (STATIC_DEMO) assertSynthetic(session.spans);
       session.spans.sort((a, b) => a.startTime - b.startTime);
       setHistory((old) => [{ name: `Imported · ${file.name}`, session }, ...old].slice(0, 6));
       replay(session);
@@ -357,6 +447,7 @@ export default function App() {
     }
   }
   async function clearData() {
+    if (STATIC_DEMO) return;
     try {
       setClearing(true);
       const result = await fetch(`${settings.collectorUrl}/api/session`, { method: 'DELETE' });
@@ -371,6 +462,7 @@ export default function App() {
     }
   }
   function exportReport() {
+    if (STATIC_DEMO) assertSynthetic(base);
     const reportSpans = (traceId ? inspectedTrace : errors).map((s) => ({
       traceId: s.traceId,
       spanId: s.spanId,
@@ -398,6 +490,7 @@ export default function App() {
     setToast('Sanitized investigation report exported.');
   }
   async function saveConnection() {
+    if (STATIC_DEMO) return;
     try {
       const endpoint = new URL(connectionDraft);
       if (
@@ -431,14 +524,16 @@ export default function App() {
     setTraceId(id);
     setSelectedEdge(null);
   }
-  const connectionLabel =
-    status === 'connected'
+  const connectionLabel = STATIC_DEMO
+    ? 'Synthetic · Offline capable'
+    : status === 'connected'
       ? 'Collector connected'
       : status === 'connecting'
         ? 'Connecting…'
         : 'Collector offline';
-  const selectedBadge =
-    mode === 'demo'
+  const selectedBadge = STATIC_DEMO
+    ? 'SYNTHETIC DEMO'
+    : mode === 'demo'
       ? 'INSTRUMENTED DEMO'
       : mode === 'synthetic'
         ? 'SYNTHETIC SAMPLE'
@@ -446,29 +541,39 @@ export default function App() {
           ? 'SESSION REPLAY'
           : 'LIVE TELEMETRY';
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${STATIC_DEMO ? 'public-demo' : 'local-app'}`}>
       <header className="topbar">
         <a
           className="brand"
-          href="#"
+          href="#/universe"
           onClick={(e) => {
             e.preventDefault();
             setPage('overview');
           }}
         >
-          <img src="/logo.svg" alt="" />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" />
           <span>
             Trace<span>Verse</span>
           </span>
-          <small>LOCAL</small>
+          <small>{STATIC_DEMO ? 'DEMO' : 'LOCAL'}</small>
         </a>
         <div className="workspace-crumb">
           <span>Workspace</span>
           <ChevronRight size={13} />
-          <b>Local universe</b>
+          <b>{STATIC_DEMO ? 'Demo · Synthetic' : 'Local universe'}</b>
         </div>
+        <label className="topbar-search">
+          <Search size={14} />
+          <input
+            aria-label="Search universe"
+            value={search}
+            placeholder="Search the universe…"
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <kbd>/</kbd>
+        </label>
         <div className="topbar-right">
-          <span className={`connection ${status}`}>
+          <span className={`connection ${STATIC_DEMO ? 'connected' : status}`}>
             <i />
             {connectionLabel}
           </span>
@@ -479,9 +584,9 @@ export default function App() {
               value={mode}
               onChange={(e) => changeMode(e.target.value as Mode)}
             >
-              <option value="demo">Demo</option>
-              <option value="live">Live</option>
-              <option value="synthetic">Synthetic</option>
+              {!STATIC_DEMO && <option value="demo">Demo · Instrumented</option>}
+              {!STATIC_DEMO && <option value="live">Live</option>}
+              <option value="synthetic">{STATIC_DEMO ? 'Demo · Synthetic' : 'Synthetic'}</option>
               <option value="replay">Replay</option>
             </select>
           </label>
@@ -513,6 +618,7 @@ export default function App() {
             <button
               key={id}
               className={page === id ? 'nav-item active' : 'nav-item'}
+              aria-current={page === id ? 'page' : undefined}
               onClick={() => setPage(id)}
             >
               <Icon size={17} />
@@ -525,6 +631,33 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <div className="mobile-filters">
+          <label>
+            <Search size={14} />
+            <input
+              aria-label="Filter mobile services"
+              placeholder="Find a service…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          <select
+            aria-label="Select a service"
+            value={selected || ''}
+            onChange={(e) => {
+              setSelected(e.target.value || null);
+              setSelectedEdge(null);
+              setTraceId(null);
+            }}
+          >
+            <option value="">Inspect service…</option>
+            {filteredNodes.map((node) => (
+              <option key={node.id} value={node.id}>
+                {node.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="sidebar-divider" />
         <div className="services-heading">
           <span>DISCOVERED SERVICES</span>
@@ -571,7 +704,13 @@ export default function App() {
                 {n.name}
                 <small>{n.category}</small>
               </span>
-              <i className={n.errorCount ? 'dot error' : 'dot healthy'} />
+              <i
+                className={
+                  observedSpansForNode(spans, n).at(-1)?.status === 'error'
+                    ? 'dot error'
+                    : 'dot healthy'
+                }
+              />
             </button>
           ))}
           {!filteredNodes.length && (
@@ -583,13 +722,17 @@ export default function App() {
         <div className="local-card">
           <ShieldCheck size={19} />
           <div>
-            <b>Your universe. Your machine.</b>
-            <p>Local by default. Free & open source.</p>
+            <b>{STATIC_DEMO ? 'Explore without installing.' : 'Your universe. Your machine.'}</b>
+            <p>
+              {STATIC_DEMO
+                ? 'Synthetic data. Free & open source.'
+                : 'Local by default. Free & open source.'}
+            </p>
           </div>
         </div>
         <div className="version-line">
           <span>
-            TraceVerse <b>v0.1.0</b>
+            TraceVerse <b>v0.2.0</b>
           </span>
           <button onClick={() => setPage('docs')} aria-label="Help">
             <HelpCircle size={15} />
@@ -605,7 +748,7 @@ export default function App() {
             </div>
             <h1>
               {page === 'overview'
-                ? 'Your application, connected.'
+                ? 'Explore your app in 3D.'
                 : page === 'services'
                   ? 'Every service, in context.'
                   : page === 'traces'
@@ -616,7 +759,9 @@ export default function App() {
                         ? 'Where time is spent.'
                         : page === 'sessions'
                           ? 'A window into the past.'
-                          : 'Connect your universe.'}
+                          : STATIC_DEMO
+                            ? 'From preview to your own app.'
+                            : 'Connect your universe.'}
             </h1>
             <p>
               {page === 'overview'
@@ -631,7 +776,9 @@ export default function App() {
                         ? 'Latency measurements from the spans in the current view.'
                         : page === 'sessions'
                           ? 'Keep, export, and replay telemetry on your machine.'
-                          : 'OpenTelemetry in. Insight out. Everything stays on your machine.'}
+                          : STATIC_DEMO
+                            ? 'Learn the controls, then run TraceVerse locally with your own telemetry.'
+                            : 'OpenTelemetry in. Insight out. Everything stays on your machine.'}
             </p>
           </div>
           <div className="heading-actions">
@@ -656,10 +803,10 @@ export default function App() {
         {mode === 'synthetic' && (
           <div className="source-notice">
             <Radio size={14} />
-            <b>Synthetic sample</b>
+            <b>Demo · Synthetic</b>
             <span>
-              Deterministic interface preview. These spans were generated in this browser and are
-              not monitored application traffic.
+              {activeScenario.title}. Browser-generated trace evidence; these measurements describe
+              simulated requests.
             </span>
           </div>
         )}
@@ -668,9 +815,28 @@ export default function App() {
             <Clock size={14} />
             <b>Historical replay</b>
             <span>
-              Playing a recorded local session · {base.length} spans · source:{' '}
+              {STATIC_DEMO
+                ? 'Replaying synthetic scenario data'
+                : 'Playing a recorded local session'}{' '}
+              · {base.length} spans · source:{' '}
               {[...new Set(base.map((s) => s.source))].join(', ') || 'empty'}.
             </span>
+          </div>
+        )}
+        {tutorialOpen && (page === 'overview' || page === 'services') && (
+          <div className="demo-tutorial">
+            <Focus size={18} />
+            <p>
+              <b>Welcome to your service universe.</b> Select a service to inspect its spans. Drag
+              to rotate, scroll or pinch to zoom, and choose a scenario below.
+            </p>
+            <button
+              className="icon-button"
+              aria-label="Dismiss tutorial"
+              onClick={() => setTutorialOpen(false)}
+            >
+              <X size={15} />
+            </button>
           </div>
         )}
         <div className="metrics">
@@ -748,6 +914,54 @@ export default function App() {
                     <span className="toolbar-rule" />
                     <button
                       className="icon-button"
+                      aria-label="Zoom in"
+                      onClick={() =>
+                        setCameraCommand((old) => ({
+                          version: (old?.version || 0) + 1,
+                          action: 'zoom-in',
+                        }))
+                      }
+                    >
+                      <ZoomIn size={16} />
+                    </button>
+                    <button
+                      className="icon-button"
+                      aria-label="Zoom out"
+                      onClick={() =>
+                        setCameraCommand((old) => ({
+                          version: (old?.version || 0) + 1,
+                          action: 'zoom-out',
+                        }))
+                      }
+                    >
+                      <ZoomOut size={16} />
+                    </button>
+                    <button
+                      className="icon-button camera-rotate"
+                      aria-label="Rotate left"
+                      onClick={() =>
+                        setCameraCommand((old) => ({
+                          version: (old?.version || 0) + 1,
+                          action: 'rotate-left',
+                        }))
+                      }
+                    >
+                      <RotateCcw size={15} />
+                    </button>
+                    <button
+                      className="icon-button camera-rotate"
+                      aria-label="Rotate right"
+                      onClick={() =>
+                        setCameraCommand((old) => ({
+                          version: (old?.version || 0) + 1,
+                          action: 'rotate-right',
+                        }))
+                      }
+                    >
+                      <RotateCcw size={15} style={{ transform: 'scaleX(-1)' }} />
+                    </button>
+                    <button
+                      className="icon-button"
                       onClick={() => setResetVersion((n) => n + 1)}
                       aria-label="Reset camera"
                     >
@@ -775,7 +989,7 @@ export default function App() {
                       : paused
                         ? 'PAUSED'
                         : mode === 'synthetic'
-                          ? 'SYNTHETIC PREVIEW'
+                          ? 'DEMO · SYNTHETIC'
                           : status === 'connected'
                             ? 'STREAMING TELEMETRY'
                             : 'WAITING FOR COLLECTOR'}
@@ -847,11 +1061,11 @@ export default function App() {
                 <div className="universe-footer">
                   <span>
                     <ShieldCheck size={13} />
-                    Processed locally
+                    {STATIC_DEMO ? 'Synthetic data only' : 'Processed locally'}
                   </span>
                   <span>
                     {mode === 'synthetic'
-                      ? 'Browser-generated sample'
+                      ? 'Bundled scenario · browser-generated spans'
                       : mode === 'demo'
                         ? 'Real spans from local demo services'
                         : mode === 'replay'
@@ -1123,7 +1337,10 @@ export default function App() {
                       <button
                         className="icon-button"
                         aria-label={`Export ${item.name}`}
-                        onClick={() => download('traceverse-session.json', item.session)}
+                        onClick={() => {
+                          if (STATIC_DEMO) assertSynthetic(item.session.spans);
+                          download('traceverse-session.json', item.session);
+                        }}
                       >
                         <Download size={16} />
                       </button>
@@ -1146,15 +1363,18 @@ export default function App() {
                       durable copy. Delete a session to remove its browser copy.
                     </p>
                   </div>
-                  <button className="danger-button" disabled={clearing} onClick={clearData}>
-                    <Trash2 size={14} />
-                    {clearing ? 'Clearing…' : 'Clear collector telemetry'}
-                  </button>
+                  {!STATIC_DEMO && (
+                    <button className="danger-button" disabled={clearing} onClick={clearData}>
+                      <Trash2 size={14} />
+                      {clearing ? 'Clearing…' : 'Clear collector telemetry'}
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
               <Documentation
                 collector={settings.collectorUrl}
+                staticDemo={STATIC_DEMO}
                 onCopy={(text) => {
                   void navigator.clipboard.writeText(text).then(
                     () => setToast('Copied to clipboard.'),
@@ -1164,6 +1384,67 @@ export default function App() {
               />
             )}
             <div className="activity-panel">
+              {(mode === 'synthetic' || STATIC_DEMO) && (
+                <div className="scenario-console" data-testid="scenario-controls">
+                  <div className="scenario-heading">
+                    <Radio size={15} />
+                    <b>SCENARIO CONTROL</b>
+                    <span>SYNTHETIC</span>
+                  </div>
+                  <div className="scenario-controls">
+                    <label>
+                      <span>Scenario</span>
+                      <select
+                        aria-label="Scenario"
+                        value={scenario}
+                        onChange={(e) => runScenario(e.target.value as ScenarioId)}
+                      >
+                        {scenarios.map((value) => (
+                          <option key={value.id} value={value.id}>
+                            {value.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="traffic-control">
+                      <span>
+                        Traffic intensity <b>{trafficIntensity}×</b>
+                      </span>
+                      <input
+                        aria-label="Traffic intensity"
+                        type="range"
+                        min="1"
+                        max="6"
+                        step="1"
+                        value={trafficIntensity}
+                        onChange={(e) => setTrafficIntensity(Number(e.target.value))}
+                      />
+                    </label>
+                    <label>
+                      <span>Playback speed</span>
+                      <select
+                        aria-label="Playback speed"
+                        value={playbackSpeed}
+                        onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                      >
+                        <option value=".5">0.5×</option>
+                        <option value="1">1×</option>
+                        <option value="2">2×</option>
+                        <option value="4">4×</option>
+                      </select>
+                    </label>
+                    <button className="primary-button" onClick={() => runScenario()}>
+                      <Play size={13} />
+                      Run scenario
+                    </button>
+                    <button className="subtle-button" onClick={replayScenario}>
+                      <RotateCcw size={13} />
+                      Replay scenario
+                    </button>
+                  </div>
+                  <p>{activeScenario.description}</p>
+                </div>
+              )}
               <div className="activity-header">
                 <div>
                   <Activity size={14} />
@@ -1209,8 +1490,10 @@ export default function App() {
                       ? 'Replaying'
                       : 'Replay paused'
                     : paused
-                      ? 'Visualization paused'
-                      : 'Following activity'}
+                      ? 'Paused · resume to continue'
+                      : mode === 'synthetic'
+                        ? 'Generating synthetic traces'
+                        : 'Following activity'}
                 </span>
                 {mode === 'replay' ? (
                   <>
@@ -1312,8 +1595,8 @@ export default function App() {
                 </div>
                 <div className="service-title-row">
                   <h2>{selectedNode.name}</h2>
-                  <span className={`status-pill ${selectedNode.errorCount ? 'failed' : 'ok'}`}>
-                    {selectedNode.errorCount ? 'Errors observed' : 'No errors'}
+                  <span className={`status-pill ${selectedHasCurrentError ? 'failed' : 'ok'}`}>
+                    {selectedHasCurrentError ? 'Latest request failed' : 'Latest request OK'}
                   </span>
                 </div>
                 <p className="inspector-subtitle">
@@ -1356,6 +1639,30 @@ export default function App() {
                     </b>
                   </span>
                 </div>
+                {mode === 'synthetic' && (
+                  <div className={`scenario-evidence ${scenario}`}>
+                    <span>SYNTHETIC EVIDENCE</span>
+                    <h3>{activeScenario.title}</h3>
+                    <p>
+                      {scenario === 'slow' && selectedNode.category === 'database'
+                        ? `${serviceSpans.filter((span) => span.durationMs > settings.latencyThreshold).length} database spans exceed ${settings.latencyThreshold} ms. SELECT order takes 900 ms in this scenario.`
+                        : scenario === 'recovery'
+                          ? `Latest request: ${latestServiceSpan?.status === 'error' ? 'failed' : 'successful'}. ${selectedNode.errorCount} earlier failed spans remain in history.`
+                          : scenario === 'error'
+                            ? 'A simulated HTTP 503 and SimulatedApiError event identify the failed API span.'
+                            : activeScenario.description}
+                    </p>
+                    {latestServiceSpan && (
+                      <button
+                        className="text-button"
+                        onClick={() => showTrace(latestServiceSpan.traceId)}
+                      >
+                        Inspect scenario trace
+                        <ArrowRight size={13} />
+                      </button>
+                    )}
+                  </div>
+                )}
                 <div className="inspector-section">
                   <h3>
                     Dependencies{' '}
@@ -1522,7 +1829,9 @@ export default function App() {
             )}
             <div className="inspector-bottom">
               <ShieldCheck size={13} />
-              Local-first. No data leaves this device.
+              {STATIC_DEMO
+                ? 'Synthetic demo. No real telemetry accepted.'
+                : 'Local-first. No data leaves this device.'}
             </div>
           </aside>
         </div>
@@ -1598,17 +1907,17 @@ export default function App() {
               </label>
               <label className="setting-row">
                 <span>
-                  Graphics quality<small>Auto caps resolution; Low disables antialiasing</small>
+                  Graphics quality<small>Low saves GPU work; Balanced caps resolution</small>
                 </span>
                 <select
                   aria-label="Graphics quality"
                   value={settings.quality}
                   onChange={(e) =>
-                    setSettings({ quality: e.target.value as 'auto' | 'low' | 'high' })
+                    setSettings({ quality: e.target.value as 'low' | 'balanced' | 'high' })
                   }
                 >
-                  <option value="auto">Automatic</option>
                   <option value="low">Low · integrated graphics</option>
+                  <option value="balanced">Balanced · recommended</option>
                   <option value="high">High</option>
                 </select>
               </label>
@@ -1660,7 +1969,9 @@ export default function App() {
                   }
                 />
               </label>
-              <div className="settings-section-title">TELEMETRY & CONNECTION</div>
+              <div className="settings-section-title">
+                {STATIC_DEMO ? 'SCENARIO ANALYSIS' : 'TELEMETRY & CONNECTION'}
+              </div>
               <label className="setting-row">
                 <span>
                   Latency warning threshold<small>Milliseconds; applies to nodes and traffic</small>
@@ -1678,66 +1989,72 @@ export default function App() {
                   }
                 />
               </label>
-              <label className="setting-row">
-                <span>
-                  Retention<small>Minutes since receipt in local collector storage</small>
-                </span>
-                <input
-                  aria-label="Event retention minutes"
-                  type="number"
-                  min="1"
-                  max="1440"
-                  value={settings.retentionMinutes}
-                  onChange={(e) =>
-                    setSettings({
-                      retentionMinutes: Math.max(1, Math.min(1440, Number(e.target.value))),
-                    })
-                  }
-                />
-              </label>
-              <label className="setting-row">
-                <span>
-                  Maximum retained spans<small>Cap collector and browser buffers</small>
-                </span>
-                <input
-                  aria-label="Maximum retained spans"
-                  type="number"
-                  min="100"
-                  max="50000"
-                  step="100"
-                  value={settings.maxSpans}
-                  onChange={(e) =>
-                    setSettings({
-                      maxSpans: Math.max(100, Math.min(50000, Number(e.target.value))),
-                    })
-                  }
-                />
-              </label>
-              <label className="connection-field">
-                <span>Collector URL</span>
-                <input
-                  aria-label="Collector URL"
-                  value={connectionDraft}
-                  onChange={(e) => setConnectionDraft(e.target.value)}
-                  placeholder="http://127.0.0.1:4318"
-                />
-              </label>
-              <div className="privacy-note">
-                <ShieldCheck size={17} />
-                <p>
-                  Only local HTTP collectors are accepted. The default endpoint is
-                  http://127.0.0.1:4318. Telemetry stays on this device.
-                </p>
-              </div>
+              {!STATIC_DEMO && (
+                <>
+                  <label className="setting-row">
+                    <span>
+                      Retention<small>Minutes since receipt in local collector storage</small>
+                    </span>
+                    <input
+                      aria-label="Event retention minutes"
+                      type="number"
+                      min="1"
+                      max="1440"
+                      value={settings.retentionMinutes}
+                      onChange={(e) =>
+                        setSettings({
+                          retentionMinutes: Math.max(1, Math.min(1440, Number(e.target.value))),
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="setting-row">
+                    <span>
+                      Maximum retained spans<small>Cap collector and browser buffers</small>
+                    </span>
+                    <input
+                      aria-label="Maximum retained spans"
+                      type="number"
+                      min="100"
+                      max="50000"
+                      step="100"
+                      value={settings.maxSpans}
+                      onChange={(e) =>
+                        setSettings({
+                          maxSpans: Math.max(100, Math.min(50000, Number(e.target.value))),
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="connection-field">
+                    <span>Collector URL</span>
+                    <input
+                      aria-label="Collector URL"
+                      value={connectionDraft}
+                      onChange={(e) => setConnectionDraft(e.target.value)}
+                      placeholder="http://127.0.0.1:4318"
+                    />
+                  </label>
+                  <div className="privacy-note">
+                    <ShieldCheck size={17} />
+                    <p>
+                      Only local HTTP collectors are accepted. The default endpoint is
+                      http://127.0.0.1:4318. Telemetry stays on this device.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
             <div className="modal-footer">
               <button className="subtle-button" onClick={() => setSettingsOpen(false)}>
                 Done
               </button>
-              <button className="primary-button" onClick={() => void saveConnection()}>
-                <Check size={14} />
-                Apply collector settings
-              </button>
+              {!STATIC_DEMO && (
+                <button className="primary-button" onClick={() => void saveConnection()}>
+                  <Check size={14} />
+                  Apply collector settings
+                </button>
+              )}
             </div>
           </section>
         </div>
@@ -1982,11 +2299,98 @@ function TraceDetails({ spans, onReport }: { spans: NormalizedSpan[]; onReport: 
 }
 function Documentation({
   collector,
+  staticDemo,
   onCopy,
 }: {
   collector: string;
+  staticDemo: boolean;
   onCopy: (text: string) => void;
 }) {
+  if (staticDemo) {
+    const install =
+      'git clone https://github.com/prohz189hh-boop/traceverse.git\ncd traceverse\nnpm install\nnpm run demo';
+    return (
+      <>
+        <PanelHeading
+          icon={<Code2 size={17} />}
+          title="Explore the demo"
+          detail="Synthetic · browser only"
+        />
+        <div className="docs-content">
+          <div className="docs-callout">
+            <ShieldCheck size={22} />
+            <div>
+              <h3>A universe you can explore instantly.</h3>
+              <p>
+                This public preview runs entirely in your browser. Every node, connection, and
+                measurement comes from bundled synthetic trace scenarios. It needs no account,
+                backend, or API key.
+              </p>
+            </div>
+          </div>
+          <h3>
+            <span className="step-number">1</span>Try the controls
+          </h3>
+          <p>
+            Select a service or connection to open the inspector. Drag the 3D universe to rotate,
+            scroll or pinch to zoom, and use Focus to follow an entity. The 2D view supports
+            keyboard navigation. Search and filters narrow both views.
+          </p>
+          <h3>
+            <span className="step-number">2</span>Investigate a scenario
+          </h3>
+          <p>
+            Choose Success, Slow database, API failure, Heavy traffic, or Recovery below. Run
+            scenario resets the synthetic observations and focuses the relevant service. Pause stops
+            trace generation and animation. Replay scenario follows span timestamps; its slider and
+            speed control let you investigate the history.
+          </p>
+          <h3>
+            <span className="step-number">3</span>Observe your own application locally
+          </h3>
+          <p>
+            Install Node.js 24 LTS, then run these commands. The local dashboard connects to a
+            collector and the instrumented demo emits real OpenTelemetry spans.
+          </p>
+          <pre>
+            <code>{install}</code>
+            <button onClick={() => onCopy(install)}>Copy</button>
+          </pre>
+          <p>
+            Open http://127.0.0.1:5173 and choose Demo for instrumented example traffic or Live for
+            your application. The collector and SQLite history run on your machine. Real telemetry
+            can only be imported into the local app; this public preview accepts synthetic sessions.
+          </p>
+          <div className="docs-tips">
+            <div>
+              <Globe size={20} />
+              <h4>Touch and keyboard</h4>
+              <p>
+                Drag and pinch the 3D view. Switch to 2D to select entities with Tab and Enter.
+                Press / to search and Escape to close Settings.
+              </p>
+            </div>
+            <div>
+              <SlidersHorizontal size={20} />
+              <h4>Graphics that fit your device</h4>
+              <p>
+                Balanced is the default. Choose Low for integrated graphics, set particles to zero,
+                or enable Reduced motion for a quieter view.
+              </p>
+            </div>
+            <div>
+              <Layers size={20} />
+              <h4>Replay synthetic evidence</h4>
+              <p>
+                Save or export a scenario from Sessions. Synthetic exports can be imported here.
+                Real local sessions belong in the local dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
   const code = `OTEL_SERVICE_NAME=my-service\nOTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${collector}/v1/traces\nOTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/json`;
   return (
     <>

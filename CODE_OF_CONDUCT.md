@@ -8,6 +8,7 @@ TraceVerse welcomes people of every background and experience level. Contributor
 - Welcome newcomers and explain feedback in a way that helps people improve.
 - Respect different perspectives and accept responsibility when your words or actions cause harm.
 - Respect people's privacy. Ask before sharing personal information or private communications.
+- Share reproducible technical evidence without posting private traces, credentials, or personal data. A synthetic fixture is enough for many interface bugs.
 
 Harassment, discriminatory language, sexual attention, threats, doxxing, and sustained disruption are not acceptable. Disagreement is welcome; intimidation and personal attacks are not.
 

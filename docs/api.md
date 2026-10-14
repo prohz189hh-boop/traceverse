@@ -2,6 +2,8 @@
 
 Base URL: **`http://127.0.0.1:4318`**. The collector listens on loopback and is intended for a trusted local developer machine. This is a trace-only HTTP JSON receiver, not a full OpenTelemetry Collector distribution.
 
+These endpoints exist only in the **local application**. The GitHub Pages demo serves static files, has no collector API or SQLite database, and never attempts collector requests. It cannot receive application telemetry.
+
 ## Network and resource limits
 
 - Allowed Host names: `127.0.0.1` and `localhost`.
@@ -118,7 +120,7 @@ Content-Type: application/json
 {"retentionMinutes":60,"maxSpans":10000}
 ```
 
-Fields are optional, but unknown fields are rejected. `retentionMinutes` must be an integer from **1–1440**; `maxSpans` must be an integer from **100–50000**. The response contains both effective fields. Applying settings prunes history and sends a reset. Collector settings apply to the current process and are not persisted across restarts in v0.1.0.
+Fields are optional, but unknown fields are rejected. `retentionMinutes` must be an integer from **1–1440**; `maxSpans` must be an integer from **100–50000**. The response contains both effective fields. Applying settings prunes history and sends a reset. Collector settings apply to the current process and are not persisted across restarts in v0.2.0.
 
 ## WebSocket stream
 

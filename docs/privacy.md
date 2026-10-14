@@ -1,6 +1,16 @@
 # Privacy and local data
 
-TraceVerse has no analytics beacon, paid API integration, or hosted telemetry backend. By default, application spans are sent to your local collector at `127.0.0.1:4318`, streamed to your local dashboard, and saved in local SQLite. Installing dependencies, cloning the repository, or following external documentation/GitHub links uses the network; running the installed application does not require an external service.
+TraceVerse has no analytics beacon, paid API integration, or hosted telemetry backend. By default, real application spans are sent to your local collector at `127.0.0.1:4318`, streamed to your local dashboard, and saved in local SQLite. Installing dependencies, cloning the repository, or following external documentation/GitHub links uses the network; running the installed application does not require an external service.
+
+## Public demo boundary
+
+The GitHub Pages site loads static assets from GitHub Pages, then generates bundled synthetic scenarios in your browser. It starts in Synthetic mode and offers Replay only for synthetic sessions. It has no application telemetry endpoint, does not contact a local collector over HTTP/WebSocket, and rejects file imports containing any `live` or `demo` spans. Never configure your application's exporter to use the public site.
+
+Synthetic saved sessions and preferences stay in browser local storage under separate public-demo keys. They are not uploaded to a telemetry backend and do not share the local application's storage namespace. GitHub Pages still receives normal asset requests; this privacy boundary concerns application telemetry, not the web host's handling of ordinary HTTP requests.
+
+Delete synthetic sessions in Sessions, or clear the site's browser storage to remove its sessions and preferences. Downloaded JSON exports stay on your disk until you delete them. Collector retention and **Clear collector telemetry** apply only to the real local collector. See [the public demo guide](public-demo.md).
+
+## Framework telemetry
 
 Next.js has a separate upstream framework usage analytics setting. The repository's optional Next.js launcher and verification command disable it through `NEXT_TELEMETRY_DISABLED=1`. When integrating your own Next.js application, set the same variable before launch; the [integration guide](instrumentation.md) includes the local environment setting. This setting is independent of exporting your application traces to TraceVerse.
 

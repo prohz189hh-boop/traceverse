@@ -1,6 +1,6 @@
 # Security policy
 
-TraceVerse v0.1.x is the initial supported release line. Security fixes are applied to the current release; older versions may need an upgrade.
+TraceVerse v0.2.x is the current supported release line. Security fixes are applied to the current release; users of v0.1.x should upgrade when a fix is published.
 
 ## Report a vulnerability privately
 
@@ -9,6 +9,8 @@ If GitHub private vulnerability reporting is enabled, use [Report a vulnerabilit
 Include the affected version, impact, prerequisites, and a minimal sanitized reproduction. Do not include authentication tokens, private telemetry, or exploit attempts against other systems. There is no paid bug bounty or guaranteed response deadline.
 
 ## Intended boundary
+
+The GitHub Pages build is a static, synthetic-only interface demonstration. It does not run a collector, connect to a local collector, accept live/demo session imports, or provide an endpoint for application telemetry. Its synthetic sessions and preferences use separate browser storage from the local build. Changes that weaken this separation should be treated as security/privacy issues.
 
 TraceVerse is a local development tool. The collector binds to loopback, checks Host/origin headers, limits request rates and body sizes, validates telemetry, strips unsupported/sensitive attributes, and bounds retention. It has no authentication or authorization system for public or shared deployment. Do not expose its port to a network as a production monitoring endpoint.
 
@@ -21,4 +23,5 @@ The safe-attribute policy reduces collection but cannot detect every secret embe
 - Inspect changes for credentials, private files, debug dumps, and generated databases.
 - Run relevant validation and inspect dependency security/license changes.
 - Keep collector validation, network controls, and session import limits covered by tests.
+- Verify the static demo makes no collector API/WebSocket requests, rejects nonsynthetic session imports, and preserves dependency notices.
 - Publish accurate release notes and disclose limitations without claiming an independent audit.

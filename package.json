@@ -1,6 +1,6 @@
 {
   "name": "traceverse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "See your app come alive in 3D. Free, local-first OpenTelemetry observability.",
@@ -17,6 +17,8 @@
     "dev": "node scripts/dev.mjs",
     "demo": "node scripts/dev.mjs --demo",
     "build": "node scripts/build.mjs",
+    "build:demo": "node scripts/build-demo.mjs",
+    "preview:demo": "node scripts/preview-demo.mjs",
     "start": "node apps/collector/dist/index.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -24,8 +26,10 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:static": "playwright test --config playwright.static.config.ts",
+    "benchmark": "node scripts/benchmark.mjs",
     "test:next": "node scripts/test-next.mjs",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build",
     "audit:licenses": "node scripts/licenses.mjs"
   },
   "devDependencies": {

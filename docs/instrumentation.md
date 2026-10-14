@@ -1,5 +1,7 @@
 # Connect an application
 
+These instructions apply to the **local application**. The [public demo](public-demo.md) uses bundled synthetic data and cannot receive application telemetry.
+
 Start TraceVerse with `npm run dev`, open http://127.0.0.1:5173, and choose **Live**. Your application needs an OpenTelemetry SDK and a **JSON HTTP** trace exporter pointed at `http://127.0.0.1:4318/v1/traces`.
 
 TraceVerse does not automatically instrument an arbitrary running application. Instrumentation must run in the application process before HTTP/framework modules are loaded, and downstream services need compatible context propagation to share a trace.
@@ -170,7 +172,7 @@ Start with `node --require ./instrumentation.cjs ./server.cjs` and visit http://
 
 ## Local TraceVerse helper
 
-`@traceverse/sdk` is a private source workspace, **not an npm registry package** in v0.1.0. Inside this repository, import it directly. In an external TypeScript app, install its local folder and use a TypeScript-aware runtime/build pipeline:
+`@traceverse/sdk` is a private source workspace, **not an npm registry package** in v0.2.0. Inside this repository, import it directly. In an external TypeScript app, install its local folder and use a TypeScript-aware runtime/build pipeline:
 
 ```sh
 npm install "C:/path/to/traceverse/packages/sdk"

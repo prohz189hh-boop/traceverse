@@ -94,7 +94,7 @@ export async function createCollector(options: CollectorOptions = {}) {
   retentionTimer.unref();
   app.get('/health', async () => ({
     status: 'ok',
-    version: '0.1.0',
+    version: '0.2.0',
     spans: store.all().length,
     settings: store.settings(),
   }));

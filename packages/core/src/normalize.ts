@@ -108,6 +108,8 @@ function nanos(input: unknown): number {
   ) {
     throw new Error('Invalid span timestamp');
   }
+  if (typeof input === 'number' && !Number.isSafeInteger(input))
+    throw new Error('Unsafe numeric timestamp; use a nanosecond string');
   const time = Number(BigInt(String(input))) / 1e6;
   if (!Number.isFinite(time) || time <= 0 || time > 8640000000000000)
     throw new Error('Invalid span timestamp');
@@ -156,9 +158,10 @@ export function normalizeOtlp(payload: unknown): NormalizedSpan[] {
         const spanId = id(raw.spanId, 'span');
         const identity = `${traceId}:${spanId}`;
         const startTime = nanos(raw.startTimeUnixNano);
-        const endTime = nanos(raw.endTimeUnixNano);
-        if (endTime < startTime || endTime - startTime > 86400000)
-          throw new Error('Invalid span duration');
+        nanos(raw.endTimeUnixNano);
+        const durationMs =
+          Number(BigInt(String(raw.endTimeUnixNano)) - BigInt(String(raw.startTimeUnixNano))) / 1e6;
+        if (durationMs < 0 || durationMs > 86400000) throw new Error('Invalid span duration');
         if (typeof raw.name !== 'string' || !raw.name.trim()) throw new Error('Invalid span name');
         const attributes = sanitizeAttributes({
           ...resourceAttributes,
@@ -200,7 +203,7 @@ export function normalizeOtlp(payload: unknown): NormalizedSpan[] {
             serviceName: cleanText(serviceName || 'unknown_service', 128),
             operation: cleanText(raw.name.split(/[?#]/)[0] ?? '', 256),
             startTime,
-            durationMs: endTime - startTime,
+            durationMs,
             status,
             kind: rawKind,
             attributes,

@@ -58,7 +58,7 @@ export async function withSpan<T>(
   attributes: Attributes = {},
 ): Promise<T> {
   return trace
-    .getTracer('traceverse-sdk', '0.1.0')
+    .getTracer('traceverse-sdk', '0.2.0')
     .startActiveSpan(name, { attributes }, async (span) => {
       try {
         const result = await work(span);

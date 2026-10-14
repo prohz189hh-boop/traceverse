@@ -2,23 +2,57 @@
 
 <img src="apps/web/public/logo.svg" alt="TraceVerse logo" width="72" />
 
-# TraceVerse
+# TraceVerse — Explore Your App in 3D
 
 **See your app come alive in 3D.**
 
-An open-source, local application trace explorer powered by OpenTelemetry.
+Free, open-source service graphs and trace inspection, powered by OpenTelemetry.
 
-[Quick start](#quick-start) · [Connect your app](docs/instrumentation.md) · [Architecture](docs/architecture.md) · [Privacy](docs/privacy.md) · [Contribute](CONTRIBUTING.md)
+### [▶ Open the interactive demo](https://prohz189hh-boop.github.io/traceverse/)
+
+**No installation, account, API key, or paid service. Clearly labeled synthetic telemetry.**
+
+[Run locally](#quick-start-with-real-telemetry) · [Connect your app](docs/instrumentation.md) · [Documentation](docs/README.md) · [Contribute](CONTRIBUTING.md)
 
 </div>
 
-TraceVerse turns spans from your Node.js application into an interactive service universe. Follow requests between services, inspect trace hierarchies and duration waterfalls, and find observed errors and slow operations. The collector, database, dashboard, and example services run on your computer. No account, subscription, cloud database, or paid API is required.
+TraceVerse turns spans into an interactive service universe. Follow dependencies, select a service, open a trace waterfall, and investigate errors or slow operations. The public GitHub Pages demo lets you explore the interface immediately with bundled synthetic scenarios. The local application keeps the real OpenTelemetry collector, SQLite history, instrumented examples, and session tools on your computer.
 
-![TraceVerse's 3D universe showing real local Express telemetry](docs/assets/universe.png)
+## What is new in v0.2.0
 
-The screenshot above is captured from the running application with the five instrumented demo services. [Watch the actual browser recording](docs/assets/demo.webm).
+- A free browser demo hosted under `/traceverse/`, with shareable hash routes and a separate static build.
+- Synthetic sign-in, slow-database, API-failure, heavy-traffic, and recovery scenarios, with adjustable traffic intensity.
+- A richer 3D universe: category shapes, directional flowing connections, activity pulses, error/latency highlights, readable labels, selection, and camera controls.
+- A responsive control center with Universe, Services, Traces, Errors, Performance, Sessions, and Documentation views.
+- Low, balanced, and high graphics presets; balanced by default, reduced motion, bounded data, and an accessible 2D alternative.
+- A lazily loaded 3D bundle and rendering that can settle when the scene is idle, paused, or reduced motion is enabled.
+- The existing local collector, real Express/SQLite demo, SDK, history, replay, and exports remain available.
 
-## Quick start
+Every displayed dependency comes from spans. A database node represents an observed database operation; it is not a database inventory scanner. Recent activity is evidence of observed spans, not a service uptime guarantee.
+
+## Try the browser demo
+
+**[Launch TraceVerse](https://prohz189hh-boop.github.io/traceverse/)**, select a service, and try the scenario controls beneath the universe. Open **Traces** to inspect the hierarchy and duration waterfall, or **Errors** to follow the synthetic API failure. Switch between **3D** and **2D**, adjust quality in **Settings**, or capture a synthetic session and replay it.
+
+The demo contains nine application/dependency entities: frontend, API gateway, auth, users, orders, database, cache, payment simulator, and notifications. All records carry the `synthetic` source. The site runs entirely in your browser; GitHub Pages does not run the collector, example servers, or SQLite. It never connects to your local collector or accepts real telemetry. See [the public demo guide](docs/public-demo.md).
+
+| Where / mode                | Data                                                         | Storage and connection                                         |
+| --------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| Public demo / **Synthetic** | Bundled demonstration spans                                  | Browser only; no collector                                     |
+| Local / **Demo**            | Real HTTP calls and SQLite queries from the example services | Local collector and SQLite                                     |
+| Local / **Live**            | Your instrumented application's spans                        | Local collector and SQLite                                     |
+| Local / **Synthetic**       | Generated interface samples                                  | Browser only                                                   |
+| **Replay**                  | Previously recorded spans                                    | Historical view; public replay accepts synthetic sessions only |
+
+## See it in action
+
+![TraceVerse v0.2.0 synthetic service universe](docs/assets/universe-v0.2.png)
+
+![Synthetic slow database trace and span inspector](docs/assets/trace-inspector-v0.2.png)
+
+These are screenshots of the working application. [Watch the actual browser demonstration](https://github.com/prohz189hh-boop/traceverse/releases/download/v0.2.0/demo-v0.2.webm).
+
+## Quick start with real telemetry
 
 Install **Node.js 24 LTS** and Git, then run:
 
@@ -29,36 +63,33 @@ npm install
 npm run demo
 ```
 
-Open **http://127.0.0.1:5173**. The command starts the dashboard, the collector at **http://127.0.0.1:4318**, and the real instrumented example services on ports **4600–4604**. Keep the terminal open; press `Ctrl+C` to stop the processes. See [the demo guide](docs/demo.md) for deterministic scenarios and optional framework examples.
+Open **http://127.0.0.1:5173**. The command starts the dashboard, the collector at **http://127.0.0.1:4318**, and five real instrumented example services on ports **4600–4604**. Keep the terminal open; `Ctrl+C` stops the processes. [The local demo guide](docs/demo.md) explains deterministic success, slow SQLite, failed-payment, and recovery requests.
 
-Dependencies need internet access during installation. Once installed, the application and examples work locally without internet access. Docker is optional and is not needed for this setup.
+Dependencies need internet access during installation. Once installed, the local application requires no cloud account, Docker daemon, separate database server, or paid API.
 
-To connect your own application without the example services:
+To connect your own application:
 
 ```sh
 npm run dev
 ```
 
-For the built application:
+Choose **Live** and follow [the instrumentation guide](docs/instrumentation.md). For a production local build:
 
 ```sh
 npm run build
 npm start
 ```
 
-Open **http://127.0.0.1:4318** for the production dashboard. See [installation and Windows troubleshooting](docs/installation.md) for runtime requirements, ports, persistence, and development commands.
+Open **http://127.0.0.1:4318**. See [installation and Windows troubleshooting](docs/installation.md) for ports, persistence, and all commands.
 
-## What v0.1.0 provides
+To preview the separate public build locally:
 
-- A 3D service graph with stable positions, selectable services and connections, directional activity, camera controls, search, filters, and a simpler 2D view.
-- Official OpenTelemetry instrumentation helpers for Node.js HTTP and Express, plus a Fastify-owned plugin integration; **OTLP/HTTP JSON trace ingestion** at `/v1/traces`.
-- Trace and error inspection, span hierarchy, duration waterfall, observed p50/p95 latency, and incoming/outgoing dependencies.
-- Four explicit modes: **Live** for your telemetry, **Demo** for real example requests, **Synthetic** for generated interface samples, and **Replay** for history or imported sessions.
-- Local SQLite history, retention controls, deletion, session export/import, replay speed, and a timeline.
-- Graphics controls, reduced motion, and accessible HTML service and trace controls alongside the scene.
-- A local multi-service example with successful requests, slow SQLite operations, failed requests, and recovery.
+```sh
+npm run build:demo
+npm run preview:demo
+```
 
-The graph only shows entities and dependencies supported by received spans. A database node represents an observed database span; it is not a database inventory scanner. Activity indicators describe recently observed telemetry, not a service uptime guarantee.
+Open **http://127.0.0.1:4173/traceverse/**. This build writes `apps/web/dist-public` and starts no collector or example services.
 
 ## Connect a real application
 
@@ -73,77 +104,78 @@ export const tracing = startTracing('my-api', {
 });
 ```
 
-Load this file before your server with Node's `--import` option. The helper belongs to this npm workspace; for an external project, use the local package setup or direct official exporter configuration in [the integration guide](docs/instrumentation.md). This release does not depend on an npm registry publication of `@traceverse/sdk`.
+The helper is a private source workspace, not a registry-published npm package. External applications can use its local folder or the direct official exporter setup in [the integration guide](docs/instrumentation.md).
 
-| Application  | Integration boundary                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| Node.js HTTP | Server/client spans from official HTTP instrumentation                                           |
-| Express      | HTTP spans and Express route/middleware spans                                                    |
-| Fastify      | HTTP spans and Fastify handler spans                                                             |
-| Next.js      | Next.js 16.4.0 Node runtime `instrumentation.ts`; local webpack development integration verified |
+| Application  | Supported integration boundary                                                  |
+| ------------ | ------------------------------------------------------------------------------- |
+| Node.js HTTP | Server/client spans from official HTTP instrumentation                          |
+| Express      | HTTP spans and Express route/middleware spans; real local multi-service fixture |
+| Fastify      | HTTP instrumentation plus the Fastify-owned `@fastify/otel` plugin              |
+| Next.js      | Next.js 16.4.0 Node runtime `instrumentation.ts`; webpack development fixture   |
 
-See [copy-paste integrations and supported versions](docs/instrumentation.md). Browser tracing, arbitrary framework discovery, metrics, logs, OTLP/gRPC, and binary Protobuf ingestion are outside v0.1.0.
+Framework support applies to the local application. The public demo requires no application instrumentation. Browser SDKs, Next.js Edge runtime, arbitrary framework discovery, metrics, logs, binary Protobuf, and OTLP/gRPC are outside v0.2.0. Next.js verification does not establish deployed/serverless or production-build support.
 
-## Explore the universe
+## Inspect evidence, then replay it
 
-Select a service or connection to inspect recent observed spans, errors, latency, and dependencies. Use trace details to see parent/child relationships and duration bars. Search and category filters help with larger graphs; reduced motion and 2D view reduce rendering cost.
+Search services and traces, filter categories and dependency direction, and select a service or connection to inspect observed latency, errors, and incoming/outgoing dependencies. Open a trace for parent/child spans and duration bars. Camera controls support zoom, orbit, focus, and reset; HTML controls and the 2D graph remain usable without selecting objects in WebGL.
 
-**Live**, **Demo**, and **Synthetic** spans are labeled and kept distinct in the dashboard. **Replay** shows historical data and must not be interpreted as current traffic. Synthetic examples exist only to explore the interface. The Demo mode is fed by actual local instrumented services, including a simulated external dependency that runs on your computer.
+Capture sessions in **Sessions**, export JSON, and replay with pause, speed, and timeline controls. The local application can import normalized real sessions. The public demo accepts only synthetic sessions and keeps its browser preferences/history separate from the local application.
 
-Percentiles and counts are calculated over the bounded set of retained/displayed spans. One request can create many spans. Span counts are **not request throughput**, and error-span percentages are **not request error rates**. Incomplete, sampled, or expired traces can hide parent spans and dependencies.
+Percentiles and counts describe the bounded set of retained/displayed spans. A single request can produce many spans: span counts are **not request throughput**, and error-span percentages are **not request error rates**. Sampling, expiry, or missing instrumentation can leave traces incomplete.
 
 ## Architecture
 
-![Actual trace inspection with the received span hierarchy and waterfall](docs/assets/trace-inspector.png)
-
 ```mermaid
 flowchart LR
-  APP[Your instrumented Node.js app] -->|OTLP HTTP JSON| C[Local Fastify collector]
-  DEMO[Real local example services] -->|OTLP HTTP JSON · demo source| C
-  C -->|Safe normalized spans| DB[(Local SQLite)]
-  C -->|WebSocket snapshot and batches| WEB[React dashboard]
-  DB -->|History and session export| WEB
-  WEB --> CORE[Trace hierarchy and service graph]
-  CORE --> VIEW[3D universe · 2D view · inspectors]
-  SYN[Synthetic samples] -->|Explicit synthetic source| WEB
+  subgraph LOCAL[Local application]
+    APP[Your instrumented app] -->|OTLP HTTP JSON| C[Loopback collector]
+    DEMO[Real Express / SQLite examples] -->|demo source| C
+    C --> DB[(Local SQLite)]
+    C -->|WebSocket / history| WEB[Local dashboard]
+  end
+  subgraph PUBLIC[Static GitHub Pages demo]
+    SYN[Bundled synthetic scenarios] --> STATIC[Browser dashboard]
+    STATIC --> STORE[Browser preferences / synthetic sessions]
+  end
+  WEB --> CORE[Shared trace / graph logic]
+  STATIC --> CORE
+  CORE --> VIEW[3D / 2D universe and inspectors]
 ```
 
-The npm workspaces separate the dashboard, collector, normalization/graph logic, SDK, visualization, and example services. See [architecture](docs/architecture.md) and the [collector API](docs/api.md).
+Both builds reuse the existing React dashboard, graph model, and visualization. The static build disables collector transport and real-session imports at the application boundary. See [architecture](docs/architecture.md), [the collector API](docs/api.md), and [privacy](docs/privacy.md).
 
 ## Performance and limits
 
-Defaults retain at most **10,000 spans** for **60 minutes**. The collector caps payload size and request rates, deduplicates spans, and bounds WebSocket buffering. Settings expose retention and visual limits. Lower graphics quality, reduce particles, enable reduced motion, or use 2D when your device struggles.
+The collector retains up to **10,000 spans** for **60 minutes** by default. Browser working sets, saved sessions, and rendered node counts are bounded separately. Lower quality, reduce particles, enable reduced motion, or use 2D when your device struggles.
 
-The 3D scene uses WebGL; graphics support and performance vary by browser, driver, and hardware. This release has no cross-device frame-rate claim or large-cluster benchmark. It is a local development tool, not an authenticated multi-user production monitoring service.
+The scene requires WebGL. Browser, driver, resolution, and hardware affect rendering. [The performance guide](docs/performance.md) explains the measurement harness and its limits; recorded results live in [performance.json](docs/performance.json). No cross-device 60 FPS or large-cluster guarantee is made.
+
+TraceVerse is a local development tool. It does not add authentication for a publicly exposed telemetry collector.
 
 ## Privacy and security
 
-The collector binds to loopback by default and checks Host/origin headers. It rejects malformed or oversized payloads and only keeps selected safe attributes. Request/response bodies, authorization headers, and environment variables are not intentionally collected. URL query strings are removed during normalization.
+The public demo loads static assets and generates synthetic spans in your browser. Real telemetry stays in the local application. Public-demo browser history/preferences are distinct from local-app storage; saved sessions do not inherit collector retention.
 
-Service names, operation names, and retained exception types can still contain sensitive text supplied by your instrumentation. Exception messages and stack traces are discarded. Review session exports before sharing them. Exports are JSON files, not encrypted archives. Learn how data is stored and deleted in [privacy](docs/privacy.md), and report vulnerabilities using [SECURITY.md](SECURITY.md).
+The local collector binds to loopback, checks Host/origin headers, validates payloads, and retains selected safe attributes. Exception messages, stack traces, arbitrary custom attributes, and URL query strings are discarded. Sensitive text can still appear in otherwise permitted service/operation names or exception types; review exports before sharing. JSON exports are unencrypted. See [privacy](docs/privacy.md) and [SECURITY.md](SECURITY.md).
 
 ## Development and validation
 
 ```sh
 npm ci
 npm run check
+npm run format:check
 npx playwright install chromium
 npm run test:e2e
+npm run test:static
 npm run test:next
 ```
 
-`check` runs type checking, linting, unit/integration tests, and production builds. Browser tests start the real demo automatically. `test:next` checks the optional local Next.js example separately. Test commands and coverage boundaries are explained in [contributing](CONTRIBUTING.md).
+`check` runs type checking, linting, formatting checks, unit/integration tests, and production builds. Local browser tests start the real demo; static tests exercise the repository base path, synthetic scenarios, interaction, mobile layout, and collector isolation. `test:next` checks the optional local Next.js fixture separately. [CONTRIBUTING.md](CONTRIBUTING.md) explains focused validation and [PROGRESS.md](PROGRESS.md) records the checks actually executed for this release. GitHub Actions results are available in [the repository](https://github.com/prohz189hh-boop/traceverse/actions).
 
-The Node.js HTTP, Express demo, Fastify 5.12.7, and Next.js 16.4.0 Node runtime integrations have been exercised locally on Windows with Node 24.20.0. Next.js verification uses webpack development mode and a genuine checkout/database trace reaching the collector; Edge, deployed/serverless, and Next.js production builds are outside that verification.
+## Roadmap and contributions
 
-GitHub Actions runs checks on Windows, Linux, and macOS, plus Chromium browser tests on Linux. A configured workflow is not a claim that every platform has already passed; see workflow results and [PROGRESS.md](PROGRESS.md) for recorded local verification.
+Next steps include binary OTLP/HTTP support, larger-graph measurement/layout, more framework fixtures, richer trace querying, and export redaction controls. Metrics/logs, browser instrumentation, and authenticated remote deployment need separate design and validation.
 
-## Roadmap
+Read [CONTRIBUTING.md](CONTRIBUTING.md), [starter contribution ideas](docs/good-first-issues.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md). Reproducible bugs and small improvements are welcome through [issues](https://github.com/prohz189hh-boop/traceverse/issues); use sanitized examples instead of private telemetry.
 
-v0.1.0 focuses on local Node.js traces and a bounded interactive explorer. Future work includes binary OTLP/HTTP support, broader framework fixtures, richer trace querying, better large-graph layouts, export redaction controls, and measured graphics budgets. Metrics/logs, browser instrumentation, and remote authenticated deployment need separate design and validation.
-
-Ideas and improvements are welcome through [issues](https://github.com/prohz189hh-boop/traceverse/issues). Please distinguish implementation bugs from missing telemetry and attach a small sanitized reproduction.
-
-## Contributing and license
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md). TraceVerse's own code is released under the [MIT license](LICENSE). Third-party packages retain their own licenses; see [third-party notices and reviewed dependency licenses](docs/licenses.md).
+TraceVerse's own code is released under the [MIT license](LICENSE). Third-party packages retain their own licenses; see [dependency notices](docs/licenses.md). The browser demo includes third-party notices for its bundled dependencies.
