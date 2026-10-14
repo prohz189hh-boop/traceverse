@@ -1,0 +1,8 @@
+node_modules
+dist
+.next
+package-lock.json
+playwright-report
+test-results
+.traceverse
+docs/assets

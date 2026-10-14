@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible problem in TraceVerse.
+title: '[Bug]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove private telemetry, tokens, and personal data. Report security vulnerabilities using SECURITY.md instead of this public form.
+  - type: input
+    id: version
+    attributes:
+      label: TraceVerse version or commit
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, and browser/version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the exact command and a small sanitized example.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include relevant sanitized errors or an actual screenshot.
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Dashboard mode
+      options:
+        - Live
+        - Demo (real local services)
+        - Synthetic
+        - Replay
+        - Not applicable

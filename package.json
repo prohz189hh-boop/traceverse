@@ -1,0 +1,22 @@
+{
+  "name": "traceverse", "version": "0.1.0", "private": true, "type": "module",
+  "description": "See your app come alive in 3D. Free, local-first OpenTelemetry observability.",
+  "license": "MIT", "engines": { "node": ">=24 <27" },
+  "workspaces": ["apps/*", "packages/*", "examples/*"],
+  "scripts": {
+    "dev": "node scripts/dev.mjs", "demo": "node scripts/dev.mjs --demo",
+    "build": "node scripts/build.mjs", "start": "node apps/collector/dist/index.mjs",
+    "typecheck": "tsc --noEmit", "lint": "eslint .", "format": "prettier --write .",
+    "format:check": "prettier --check .", "test": "vitest run",
+    "test:e2e": "playwright test", "test:next": "node scripts/test-next.mjs",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "audit:licenses": "node scripts/licenses.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1", "@playwright/test": "1.64.0",
+    "@types/node": "^24.0.0", "@types/react": "19.3.0", "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0", "@types/express": "5.0.6", "@types/ws": "8.18.2",
+    "typescript": "6.0.3", "typescript-eslint": "8.71.2", "eslint": "10.12.0",
+    "prettier": "3.9.10", "tsx": "4.23.15", "esbuild": "0.28.2", "vitest": "5.0.4"
+  }
+}
