@@ -26,7 +26,7 @@ The graph can infer a database dependency from actual database spans. The sandbo
 | Scenario   | Result                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------ |
 | `success`  | Checkout calls users, orders, SQLite, and the payment sandbox successfully                 |
-| `slow`     | An order database operation adds a 420 ms delay around the real SQLite query               |
+| `slow`     | An order database operation adds a 650 ms delay around the real SQLite query               |
 | `error`    | Payment sandbox returns a deterministic error, propagated back through the caller services |
 | `multi`    | Checkout adds another user-service request                                                 |
 | `recovery` | A successful request after an error scenario; the response marks recovery                  |

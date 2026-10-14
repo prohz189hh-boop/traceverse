@@ -216,14 +216,13 @@ The repository includes `examples/nextjs-demo` as a local fixture. Verify it sep
 npm run test:next
 ```
 
-To run it manually, first start the collector with `npm run dev`, then run in another PowerShell terminal. The environment variable disables Next.js's separate framework usage analytics:
+To run it manually, first start the collector with `npm run dev`, then run in another terminal:
 
-```powershell
-$env:NEXT_TELEMETRY_DISABLED = '1'
-npm run dev --workspace @traceverse/nextjs-demo -- --webpack
+```sh
+npm run dev --workspace @traceverse/nextjs-demo
 ```
 
-In a POSIX shell, use `NEXT_TELEMETRY_DISABLED=1 npm run dev --workspace @traceverse/nextjs-demo -- --webpack`. This is a process environment setting; no global telemetry preference change is required. See [Next.js's telemetry documentation](https://nextjs.org/telemetry).
+The repository launcher selects webpack and disables Next.js's separate framework usage analytics through `NEXT_TELEMETRY_DISABLED=1`. For your own Next.js app, set `$env:NEXT_TELEMETRY_DISABLED = '1'` in PowerShell before launch, or use a `NEXT_TELEMETRY_DISABLED=1` prefix in a POSIX shell. This is a process environment setting; no global telemetry preference change is required. See [Next.js's telemetry documentation](https://nextjs.org/telemetry).
 
 Open http://127.0.0.1:4700. The example is installed through the root workspace; it does not require a registry-published TraceVerse package.
 

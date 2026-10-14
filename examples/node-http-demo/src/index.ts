@@ -12,5 +12,13 @@ server.listen(Number(process.env.TRACEVERSE_PORT ?? 4800), '127.0.0.1', () => {
   const address = server.address();
   if (address && typeof address !== 'string') console.log(`FRAMEWORK_READY ${address.port}`);
 });
-process.on('SIGTERM', () => server.close(() => { void sdk.shutdown(); }));
-process.on('SIGINT', () => server.close(() => { void sdk.shutdown(); }));
+process.on('SIGTERM', () =>
+  server.close(() => {
+    void sdk.shutdown();
+  }),
+);
+process.on('SIGINT', () =>
+  server.close(() => {
+    void sdk.shutdown();
+  }),
+);

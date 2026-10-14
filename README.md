@@ -14,6 +14,10 @@ An open-source, local application trace explorer powered by OpenTelemetry.
 
 TraceVerse turns spans from your Node.js application into an interactive service universe. Follow requests between services, inspect trace hierarchies and duration waterfalls, and find observed errors and slow operations. The collector, database, dashboard, and example services run on your computer. No account, subscription, cloud database, or paid API is required.
 
+![TraceVerse's 3D universe showing real local Express telemetry](docs/assets/universe.png)
+
+The screenshot above is captured from the running application with the five instrumented demo services. [Watch the actual browser recording](docs/assets/demo.webm).
+
 ## Quick start
 
 Install **Node.js 24 LTS** and Git, then run:
@@ -89,6 +93,8 @@ Select a service or connection to inspect recent observed spans, errors, latency
 Percentiles and counts are calculated over the bounded set of retained/displayed spans. One request can create many spans. Span counts are **not request throughput**, and error-span percentages are **not request error rates**. Incomplete, sampled, or expired traces can hide parent spans and dependencies.
 
 ## Architecture
+
+![Actual trace inspection with the received span hierarchy and waterfall](docs/assets/trace-inspector.png)
 
 ```mermaid
 flowchart LR

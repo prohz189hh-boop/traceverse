@@ -1,4 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
-export default defineConfig({ plugins: [react(), tailwind()], server: { host: '127.0.0.1', port: 5173, strictPort: true, proxy: { '/api': 'http://127.0.0.1:4318', '/v1': 'http://127.0.0.1:4318', '/ws': { target: 'ws://127.0.0.1:4318', ws: true } } }, build: { chunkSizeWarningLimit: 1100 } });
+export default defineConfig({
+  plugins: [react(), tailwind()],
+  server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/api': 'http://127.0.0.1:4318',
+      '/v1': 'http://127.0.0.1:4318',
+      '/ws': { target: 'ws://127.0.0.1:4318', ws: true },
+    },
+  },
+  build: { chunkSizeWarningLimit: 1100 },
+});

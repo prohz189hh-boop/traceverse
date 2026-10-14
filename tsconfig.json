@@ -1,5 +1,15 @@
 {
   "extends": "./packages/config/tsconfig.json",
-  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "packages/**/*.tsx", "examples/**/*.ts", "examples/**/*.tsx", "tests/**/*.ts", "playwright.config.ts", "vitest.config.ts"],
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "examples/**/*.ts",
+    "examples/**/*.tsx",
+    "tests/**/*.ts",
+    "playwright.config.ts",
+    "vitest.config.ts"
+  ],
   "exclude": ["node_modules", "**/dist", "**/.next", "**/next-env.d.ts"]
 }

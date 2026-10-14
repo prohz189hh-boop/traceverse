@@ -2,7 +2,7 @@
 
 TraceVerse has no analytics beacon, paid API integration, or hosted telemetry backend. By default, application spans are sent to your local collector at `127.0.0.1:4318`, streamed to your local dashboard, and saved in local SQLite. Installing dependencies, cloning the repository, or following external documentation/GitHub links uses the network; running the installed application does not require an external service.
 
-Next.js has a separate upstream framework usage analytics setting. When integrating your own Next.js application, set `NEXT_TELEMETRY_DISABLED=1` before launching it to disable that program; the [integration guide](instrumentation.md) includes the local environment setting. This setting is independent of exporting your application traces to TraceVerse.
+Next.js has a separate upstream framework usage analytics setting. The repository's optional Next.js launcher and verification command disable it through `NEXT_TELEMETRY_DISABLED=1`. When integrating your own Next.js application, set the same variable before launch; the [integration guide](instrumentation.md) includes the local environment setting. This setting is independent of exporting your application traces to TraceVerse.
 
 ## What is retained
 
