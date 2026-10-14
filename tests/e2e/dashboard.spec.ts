@@ -205,6 +205,8 @@ test('synthetic sample works offline without mixing it with live telemetry', asy
 test('small screens stay usable and hostile session imports are rejected', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
+  // Exercise the wider font fallback used by Linux runners as well as Windows.
+  await page.addStyleTag({ content: ':root { font-family: Arial, sans-serif; }' });
   await page.getByLabel('Data source').selectOption('synthetic');
   await page.getByRole('button', { name: '2D view', exact: true }).click();
   await expect(page.getByTestId('universe')).toBeVisible();

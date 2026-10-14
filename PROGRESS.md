@@ -14,7 +14,7 @@ Target: a tested MIT-licensed v0.2.0 upgrade and public synthetic-only GitHub Pa
 - License audit reviewed 550 locked dependencies with no unresolved expressions; zero npm audit vulnerabilities. Browser builds retain 61 full upstream notices and checked-in source texts. Credential-pattern scan found no matches.
 - GitHub Pages setting successfully enabled with `build_type=workflow` and HTTPS. Workflow builds/tests public output before deployment. No public deployment or v0.2.0 release is claimed yet.
 - Benchmark completed: Windows/i7-1165G7, Chromium 156, explicitly selected SwiftShader software WebGL, five-second heavy-scenario samples. Balanced 19.1 actual renders/second; navigation to first 3D frame 2.47–4.50 seconds across presets; all presets settled to zero rendered frames over a three-second pause sample. Low had substantial initial stalls, so the sample cannot rank presets or predict hardware GPU performance. Full measurements: `docs/performance.json`.
-- Saved implementation milestone as commit `0b33c9f`. Remaining: push tested update; green cross-platform CI and Pages deployment; verify deployed URL; publish tagged release and actual video; record completion.
+- Implementation milestone `0b33c9f` and verification checkpoint `8b466e6` pushed to the existing repository. Initial Pages build/deployment succeeded at https://github.com/prohz189hh-boop/traceverse/actions/runs/38584569441. Windows/Linux checks passed; CI found mobile header overflow with Linux's wider font fallback. Reduced mobile header padding and bounded its source selector; verification is in progress. Remaining: green cross-platform CI for the correction; verify deployed URL; publish tagged release and actual video; record completion.
 
 ## v0.1.0 verified release history
 

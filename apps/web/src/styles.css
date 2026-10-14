@@ -2985,9 +2985,15 @@ td code {
   .topbar-right {
     gap: 5px;
     margin-left: auto;
+    padding: 0 10px 0 6px;
+    min-width: 0;
+  }
+  .source-select {
+    min-width: 0;
   }
   .source-select select {
-    max-width: 135px;
+    min-width: 0;
+    max-width: 120px;
     font-size: 10px;
   }
   .main-content {
